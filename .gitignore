@@ -3,6 +3,7 @@ dist
 dist-ssr
 *.tsbuildinfo
 .claude/
+.gh/
 Microsoft/
 *.local
 .vite
