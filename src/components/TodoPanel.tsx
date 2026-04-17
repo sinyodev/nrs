@@ -9,10 +9,6 @@ function shiftDay(iso: string, offset: number): string {
   return date.toISOString().slice(0, 10)
 }
 
-function buildWindow(activeDay: string) {
-  return [activeDay, shiftDay(activeDay, -1), shiftDay(activeDay, -2)]
-}
-
 function dayLabel(iso: string) {
   const date = new Date(`${iso}T00:00:00`)
   return date.toLocaleDateString('ko-KR', {
@@ -20,17 +16,6 @@ function dayLabel(iso: string) {
     day: '2-digit',
     weekday: 'short',
   })
-}
-
-interface TodoPanelProps {
-  activeDay: string
-  actions: Action[]
-  tasks: Task[]
-  goals: Goal[]
-  onChangeDay: (day: string) => void
-  onAddAction: (title: string) => void
-  onEditActionTitle: (actionId: number, title: string) => void
-  onLinkTaskToAction: (actionId: number, taskId: number) => void
 }
 
 function goalMap(goals: Goal[]) {
@@ -48,6 +33,17 @@ function chainFor(task: Task | undefined, goalsById: Map<number, Goal>) {
   }
 }
 
+interface TodoPanelProps {
+  activeDay: string
+  actions: Action[]
+  tasks: Task[]
+  goals: Goal[]
+  onChangeDay: (day: string) => void
+  onAddAction: (title: string) => void
+  onEditActionTitle: (actionId: number, title: string) => void
+  onLinkTaskToAction: (actionId: number, taskId: number) => void
+}
+
 export function TodoPanel({
   activeDay,
   actions,
@@ -61,15 +57,18 @@ export function TodoPanel({
   const [draftTitle, setDraftTitle] = useState('')
   const [dropTarget, setDropTarget] = useState<number | null>(null)
   const goalsById = useMemo(() => goalMap(goals), [goals])
-  const windowDays = useMemo(() => buildWindow(activeDay), [activeDay])
   const taskById = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks])
-
-  const visibleActions = useMemo(
-    () => windowDays.flatMap((day) =>
-      actions
-        .filter((action) => (action.scheduledDay ?? activeDay) === day)
-        .map((action) => ({ day, action })),
-    ),
+  const windowDays = useMemo(
+    () => [activeDay, shiftDay(activeDay, -1), shiftDay(activeDay, -2)],
+    [activeDay],
+  )
+  const rows = useMemo(
+    () =>
+      windowDays.flatMap((day) =>
+        actions
+          .filter((action) => (action.scheduledDay ?? activeDay) === day)
+          .map((action) => ({ action, day })),
+      ),
     [actions, activeDay, windowDays],
   )
 
@@ -81,131 +80,113 @@ export function TodoPanel({
   }
 
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden border border-line bg-surface">
-      <div className="border-b border-line px-4 py-3">
-        <div className="flex items-end justify-between gap-4">
+    <section className="flex min-h-0 flex-col overflow-hidden border-l border-line bg-surface pl-5">
+      <div className="shrink-0 border-b border-line pb-3 pt-2">
+        <div className="flex items-end justify-between gap-3">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-40">TODO</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-ink-40">TODO</div>
             <h2 className="mt-1 text-lg font-semibold text-ink-100">액션 관리</h2>
           </div>
           <div className="text-right text-xs text-ink-50">
             <div>선택 날짜</div>
-            <div className="mt-0.5 text-sm font-semibold text-ink-100">{dayLabel(activeDay)}</div>
+            <div className="mt-0.5 font-semibold text-ink-90">{dayLabel(activeDay)}</div>
           </div>
         </div>
-
         <div className="mt-3">
           <DateStrip activeDay={activeDay} onChange={onChangeDay} />
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full border-collapse">
-          <thead className="sticky top-0 z-10 bg-surface">
-            <tr className="border-b border-line">
-              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-40">
-                Action
-              </th>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-40">
-                Task
-              </th>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-40">
-                Initiative
-              </th>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-40">
-                KR
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-line/60">
-              <td className="px-4 py-3 align-top">
-                <div className="flex items-center gap-2">
-                  <input
-                    value={draftTitle}
-                    onChange={(e) => setDraftTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        submitDraft()
-                      }
-                    }}
-                    placeholder="새 액션 입력"
-                    className="w-full border-0 bg-transparent px-0 py-1 text-sm outline-none placeholder:text-ink-40"
-                  />
-                  <button
-                    type="button"
-                    onClick={submitDraft}
-                    className="shrink-0 text-xs font-semibold text-brand-600 hover:underline"
-                  >
-                    추가
-                  </button>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-xs text-ink-40">공란</td>
-              <td className="px-4 py-3 text-xs text-ink-40">공란</td>
-              <td className="px-4 py-3 text-xs text-ink-40">공란</td>
-            </tr>
+        <div className="grid min-w-[760px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr] border-b border-line py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-40">
+          <div className="px-2">Action</div>
+          <div className="px-2">Task</div>
+          <div className="px-2">Initiative</div>
+          <div className="px-2">KR</div>
+        </div>
 
-            {visibleActions.length === 0 ? (
-              <tr className="border-b border-line/60">
-                <td colSpan={4} className="px-4 py-6 text-sm text-ink-40">
-                  이 날짜 구간에는 액션이 없습니다.
-                </td>
-              </tr>
-            ) : null}
+        <div className="grid min-w-[760px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr] border-b border-line/70 py-2 text-sm">
+          <div className="flex items-center gap-2 px-2">
+            <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded bg-emerald-600 px-1.5 text-[10px] font-bold leading-none text-white">
+              A
+            </span>
+            <input
+              value={draftTitle}
+              onChange={(event) => setDraftTitle(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  submitDraft()
+                }
+              }}
+              placeholder="새 액션 입력"
+              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-ink-40"
+            />
+            <button
+              type="button"
+              onClick={submitDraft}
+              className="text-xs text-ink-80 hover:text-brand-600"
+            >
+              + Action
+            </button>
+          </div>
+          <div className="px-2 text-xs italic text-ink-40">공란</div>
+          <div className="px-2 text-xs italic text-ink-40">공란</div>
+          <div className="px-2 text-xs italic text-ink-40">공란</div>
+        </div>
 
-            {visibleActions.map(({ day, action }) => {
-              const chain = chainFor(taskById.get(action.taskId ?? -1), goalsById)
-              const isDropTarget = dropTarget === action.id
-              return (
-                <tr
-                  key={action.id}
-                  onDragOver={(e) => {
-                    if (!Array.from(e.dataTransfer.types).includes('application/x-nrs-task-id')) {
-                      return
-                    }
-                    e.preventDefault()
-                    setDropTarget(action.id)
-                  }}
-                  onDragLeave={() => {
-                    if (dropTarget === action.id) setDropTarget(null)
-                  }}
-                  onDrop={(e) => {
-                    const raw = e.dataTransfer.getData('application/x-nrs-task-id')
-                    if (!raw) return
-                    const taskId = Number(raw)
-                    if (!Number.isNaN(taskId)) onLinkTaskToAction(action.id, taskId)
-                    setDropTarget(null)
-                  }}
-                  className={`border-b border-line/60 transition-colors ${
-                    isDropTarget ? 'bg-brand-50/40' : 'hover:bg-surface-2/40'
-                  }`}
-                >
-                  <td className="px-4 py-3 align-top">
-                    <div className="space-y-1">
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-40">
-                        {dayLabel(day)}
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="mt-1 shrink-0 text-[10px] font-bold text-rose-500">A</span>
-                        <EditableText
-                          value={action.title}
-                          onCommit={(title) => onEditActionTitle(action.id, title)}
-                          className="min-w-0 flex-1 bg-transparent text-sm text-ink-100 outline-none"
-                          placeholder="Action"
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 align-top text-sm text-ink-80">{chain.task}</td>
-                  <td className="px-4 py-3 align-top text-sm text-ink-80">{chain.initiative}</td>
-                  <td className="px-4 py-3 align-top text-sm text-ink-80">{chain.kr}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        {rows.length === 0 ? (
+          <div className="min-w-[760px] border-b border-line/60 px-2 py-5 text-sm italic text-ink-40">
+            선택한 날짜 구간에 액션이 없습니다.
+          </div>
+        ) : null}
+
+        {rows.map(({ action, day }) => {
+          const chain = chainFor(taskById.get(action.taskId ?? -1), goalsById)
+          const isDropTarget = dropTarget === action.id
+
+          return (
+            <div
+              key={action.id}
+              onDragOver={(event) => {
+                if (!Array.from(event.dataTransfer.types).includes('application/x-nrs-task-id')) {
+                  return
+                }
+                event.preventDefault()
+                setDropTarget(action.id)
+              }}
+              onDragLeave={() => {
+                if (dropTarget === action.id) setDropTarget(null)
+              }}
+              onDrop={(event) => {
+                const raw = event.dataTransfer.getData('application/x-nrs-task-id')
+                if (!raw) return
+                const taskId = Number(raw)
+                if (!Number.isNaN(taskId)) onLinkTaskToAction(action.id, taskId)
+                setDropTarget(null)
+              }}
+              className={`grid min-h-9 min-w-[760px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr] items-center border-b border-line/60 py-1.5 text-sm transition-colors ${
+                isDropTarget ? 'bg-brand-50/50' : 'hover:bg-surface-2/40'
+              }`}
+            >
+              <div className="flex min-w-0 items-center gap-2 px-2">
+                <span className="w-[68px] shrink-0 text-[11px] text-ink-40">{dayLabel(day)}</span>
+                <span className="inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded bg-emerald-600 px-1.5 text-[10px] font-bold leading-none text-white">
+                  A
+                </span>
+                <EditableText
+                  value={action.title}
+                  onCommit={(title) => onEditActionTitle(action.id, title)}
+                  className="min-w-0 flex-1 bg-transparent text-left text-ink-100 outline-none"
+                  placeholder="Action"
+                />
+              </div>
+              <div className="min-w-0 truncate px-2 text-ink-80">{chain.task}</div>
+              <div className="min-w-0 truncate px-2 text-ink-80">{chain.initiative}</div>
+              <div className="min-w-0 truncate px-2 text-ink-80">{chain.kr}</div>
+            </div>
+          )
+        })}
       </div>
     </section>
   )

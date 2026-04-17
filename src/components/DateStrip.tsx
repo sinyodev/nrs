@@ -13,27 +13,27 @@ export function DateStrip({ activeDay, onChange }: DateStripProps) {
   const days = Array.from({ length: 7 }, (_, index) => addDays(activeDay, index - 3))
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2">
+    <div className="flex items-center gap-1 overflow-x-auto">
       {days.map((day) => {
         const date = new Date(`${day}T00:00:00`)
-        const isActive = day === activeDay
+        const active = day === activeDay
         return (
           <button
             key={day}
             type="button"
             onClick={() => onChange(day)}
-            className={`min-w-[84px] rounded-xl border px-3 py-2 text-left transition-colors ${
-              isActive
-                ? 'border-brand-500 bg-brand-50 text-brand-700'
-                : 'border-line bg-surface text-ink-80 hover:bg-surface-2'
+            className={`h-8 min-w-[62px] border-b-2 px-1 text-center text-xs transition-colors ${
+              active
+                ? 'border-brand-500 font-semibold text-ink-100'
+                : 'border-transparent text-ink-50 hover:border-line hover:text-ink-80'
             }`}
           >
-            <div className="text-[10px] font-semibold uppercase opacity-70">
+            <span className="block leading-3">
               {date.toLocaleDateString('ko-KR', { weekday: 'short' })}
-            </div>
-            <div className="text-sm font-bold tabular-nums">
+            </span>
+            <span className="block leading-4 tabular-nums">
               {date.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
-            </div>
+            </span>
           </button>
         )
       })}
