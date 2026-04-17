@@ -111,19 +111,19 @@ export default function TasksPage() {
               <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-40">
                 OKIT / TODO
               </div>
-              <h1 className="mt-1 text-2xl font-bold text-ink-100">할일 구조 재정리</h1>
+              <h1 className="mt-1 text-2xl font-bold text-ink-100">할일 구조 정리</h1>
               <p className="mt-1 text-sm text-ink-50">
-                왼쪽은 OKIT, 오른쪽은 TODO입니다. Task를 끌어다가 Action에 연결하세요.
+                왼쪽은 OKIT, 오른쪽은 TODO입니다. Task를 드래그해서 Action에 연결하세요.
               </p>
             </div>
-            <div className="rounded-2xl border border-line bg-surface-2 px-4 py-3 text-right">
-              <div className="text-[11px] text-ink-50">레이아웃</div>
+            <div className="text-right">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-ink-40">layout</div>
               <div className="text-sm font-semibold text-ink-100">OKIT 40% / TODO 60%</div>
             </div>
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 gap-4 overflow-hidden p-4">
+        <div className="flex min-h-0 flex-1 gap-3 overflow-hidden p-3">
           <div className="min-w-0 basis-[40%]">
             <OkitPanel
               goals={board.goals}
