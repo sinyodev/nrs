@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRS - 그라운드룰</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f6fa;
+    color: #1e1e1e;
+    font-size: 13px;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ───── Sidebar ───── */
+  .sidebar {
+    width: 180px;
+    min-width: 180px;
+    background: #fff;
+    border-right: 1px solid #e8e8ec;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    z-index: 10;
+  }
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 20px 14px;
+    font-weight: 700;
+    font-size: 16px;
+    color: #1e1e1e;
+  }
+  .sidebar-logo .logo-icon {
+    width: 28px; height: 28px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 14px;
+  }
+  .sidebar-nav { flex: 1; padding: 4px 8px; overflow-y: auto; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: #5f5f6b;
+    cursor: pointer;
+    font-size: 13.5px;
+    transition: background .15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: #f5f6fa; }
+  .nav-item.active { background: #f0f0f5; color: #1e1e1e; font-weight: 600; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-divider { height: 1px; background: #e8e8ec; margin: 6px 12px; }
+  .sidebar-bottom {
+    padding: 12px;
+    border-top: 1px solid #e8e8ec;
+  }
+  .sidebar-user {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+  .sidebar-user .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #ddd; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #555;
+  }
+  .sidebar-user .user-info { display: flex; flex-direction: column; }
+  .sidebar-user .user-name { font-weight: 600; color: #1e1e1e; font-size: 12.5px; }
+  .sidebar-user .user-email { color: #8e8e9a; font-size: 11px; }
+
+  /* ───── Main Content ───── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Top Header */
+  .top-header {
+    background: #fff;
+    border-bottom: 1px solid #e8e8ec;
+    padding: 18px 28px 0;
+  }
+  .top-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .team-title { font-size: 18px; font-weight: 700; }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .team-avatars { display: flex; align-items: center; }
+  .team-avatars .av {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid #fff;
+    margin-left: -8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: #fff;
+  }
+  .team-avatars .av:first-child { margin-left: 0; }
+  .team-avatars .av-more {
+    background: #e8e8ec; color: #555;
+    font-size: 10px; font-weight: 600;
+  }
+  .btn-setting {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 8px;
+    border: 1px solid #e0e0e5; background: #fff;
+    font-size: 12.5px; color: #555; cursor: pointer;
+  }
+  .btn-tutorial {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 8px;
+    border: 1px solid #e0e0e5; background: #fff;
+    font-size: 12.5px; color: #f59e0b; cursor: pointer;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 0;
+  }
+  .tab {
+    padding: 10px 16px;
+    color: #8e8e9a;
+    font-size: 13.5px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: #555; }
+  .tab.active { color: #1e1e1e; font-weight: 600; border-bottom-color: #1e1e1e; }
+
+  /* ───── Content Area ───── */
+  .content { flex: 1; overflow: auto; padding: 20px 28px 40px; }
+
+  /* Date Bar */
+  .date-bar {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .date-bar .arrow {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1px solid #e0e0e5; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #888;
+  }
+  .date-bar .arrow:hover { background: #f5f6fa; }
+  .date-bar .date-text { font-size: 15px; font-weight: 600; }
+  .date-bar .btn-today {
+    padding: 5px 14px; border-radius: 6px;
+    border: 1px solid #e0e0e5; background: #fff;
+    font-size: 12.5px; color: #555; cursor: pointer;
+  }
+  .date-bar .btn-today:hover { background: #f5f6fa; }
+
+  /* Summary Cards */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .summary-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    border: 1px solid #e8e8ec;
+  }
+  .summary-card .label {
+    font-size: 12px; color: #8e8e9a; margin-bottom: 8px;
+  }
+  .summary-card .value {
+    font-size: 26px; font-weight: 700;
+  }
+  .summary-card .sub {
+    font-size: 11.5px; color: #8e8e9a; margin-top: 4px;
+  }
+  .summary-card .value.green { color: #22c55e; }
+  .summary-card .value.red { color: #ef4444; }
+  .summary-card .value.orange { color: #f59e0b; }
+  .summary-card .value.blue { color: #3b82f6; }
+
+  /* Filter Bar */
+  .filter-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .filter-group {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .filter-group .filter-label {
+    font-size: 12px; color: #8e8e9a; margin-right: 4px;
+  }
+  .chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e5;
+    background: #fff;
+    font-size: 12.5px;
+    color: #5f5f6b;
+    cursor: pointer;
+    transition: all .15s;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chip:hover { border-color: #bbb; }
+  .chip.active {
+    background: #1e1e1e;
+    color: #fff;
+    border-color: #1e1e1e;
+  }
+  .view-toggle {
+    display: flex; gap: 4px;
+  }
+  .view-btn {
+    width: 32px; height: 32px;
+    border-radius: 6px; border: 1px solid #e0e0e5;
+    background: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #8e8e9a;
+  }
+  .view-btn.active { background: #1e1e1e; color: #fff; border-color: #1e1e1e; }
+
+  /* ───── Matrix Table ───── */
+  .matrix-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e8e8ec;
+    overflow: hidden;
+  }
+  .matrix-scroll {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 360px);
+  }
+  .matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+  }
+  .matrix-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #fafafa;
+    border-bottom: 1px solid #e8e8ec;
+    padding: 10px 6px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .matrix-table thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #fafafa;
+    min-width: 280px;
+    text-align: left;
+    padding-left: 16px;
+  }
+  .matrix-table thead th:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 4;
+    background: #f0f7ff;
+    min-width: 72px;
+  }
+  .matrix-table thead th .member-name {
+    font-size: 12px; font-weight: 600; color: #1e1e1e;
+  }
+  .matrix-table thead th .member-role {
+    font-size: 10px; color: #8e8e9a; font-weight: 400;
+  }
+
+  /* Group Header Row */
+  .group-row td {
+    background: #f8f8fb;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: 12px;
+    color: #5f5f6b;
+    border-bottom: 1px solid #e8e8ec;
+    position: sticky;
+    left: 0;
+    cursor: pointer;
+  }
+  .group-row td .group-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .group-row td .group-badge.freq-always { background: #ede9fe; color: #7c3aed; }
+  .group-row td .group-badge.freq-daily { background: #dbeafe; color: #2563eb; }
+  .group-row td .group-badge.freq-weekly { background: #fef3c7; color: #d97706; }
+  .group-row td .group-badge.freq-monthly { background: #fce7f3; color: #db2777; }
+  .group-row td .group-count {
+    font-size: 11px; font-weight: 400; color: #8e8e9a; margin-left: 6px;
+  }
+  .group-row td .chevron {
+    display: inline-block;
+    transition: transform .2s;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+  .group-row td .chevron.collapsed { transform: rotate(-90deg); }
+
+  /* Rule rows */
+  .matrix-table tbody td {
+    padding: 10px 6px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f3;
+    vertical-align: middle;
+  }
+  .matrix-table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fff;
+    text-align: left;
+    padding-left: 28px;
+    font-size: 12.5px;
+    color: #333;
+    min-width: 280px;
+    max-width: 320px;
+  }
+  .matrix-table tbody td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: #f0f7ff;
+    font-weight: 700;
+    font-size: 12.5px;
+    min-width: 72px;
+  }
+  .matrix-table tbody tr:hover td {
+    background: #fafbff;
+  }
+  .matrix-table tbody tr:hover td:first-child {
+    background: #f5f7ff;
+  }
+  .matrix-table tbody tr:hover td:last-child {
+    background: #e8f0fd;
+  }
+
+  .rule-name {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .rule-name .rule-text {
+    font-size: 12.5px;
+    color: #1e1e1e;
+    line-height: 1.4;
+  }
+  .rule-name .rule-detail {
+    font-size: 11px;
+    color: #8e8e9a;
+  }
+
+  /* Cell statuses */
+  .cell { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; font-weight: 700; font-size: 13px; }
+  .cell.comply { background: #dcfce7; color: #16a34a; }
+  .cell.violate { background: #fee2e2; color: #dc2626; }
+  .cell.na { background: #f3f4f6; color: #9ca3af; font-size: 16px; }
+
+  /* Rate cell */
+  .rate { font-weight: 700; }
+  .rate.high { color: #16a34a; }
+  .rate.mid { color: #f59e0b; }
+  .rate.low { color: #dc2626; }
+
+  /* Footer summary row */
+  .matrix-table tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    background: #fafafa;
+    border-top: 2px solid #e8e8ec;
+    padding: 10px 6px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 12.5px;
+  }
+  .matrix-table tfoot td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #fafafa;
+    text-align: left;
+    padding-left: 16px;
+    color: #5f5f6b;
+  }
+  .matrix-table tfoot td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 4;
+    background: #e0ecff;
+    font-size: 13px;
+  }
+
+  /* ───── Person View (Card View) ───── */
+  .person-view { display: none; }
+  .person-view.active { display: block; }
+  .matrix-wrapper.hidden { display: none; }
+
+  .person-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .person-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e8e8ec;
+    padding: 18px;
+    transition: box-shadow .15s;
+  }
+  .person-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+  .person-card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f3;
+  }
+  .person-card-header .pc-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff;
+  }
+  .person-card-header .pc-info { flex: 1; }
+  .person-card-header .pc-name { font-weight: 600; font-size: 13.5px; }
+  .person-card-header .pc-role { font-size: 11px; color: #8e8e9a; }
+  .person-card-header .pc-rate {
+    font-size: 18px; font-weight: 700;
+  }
+  .person-card-rules { display: flex; flex-direction: column; gap: 6px; }
+  .pc-rule {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0;
+  }
+  .pc-rule .pc-status { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .pc-rule .pc-status.comply { background: #dcfce7; color: #16a34a; }
+  .pc-rule .pc-status.violate { background: #fee2e2; color: #dc2626; }
+  .pc-rule .pc-status.na { background: #f3f4f6; color: #9ca3af; }
+  .pc-rule .pc-rule-text { font-size: 12px; color: #333; flex: 1; }
+  .pc-rule .pc-freq {
+    font-size: 10px; padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+  }
+  .pc-freq.freq-always { background: #ede9fe; color: #7c3aed; }
+  .pc-freq.freq-daily { background: #dbeafe; color: #2563eb; }
+  .pc-freq.freq-weekly { background: #fef3c7; color: #d97706; }
+  .pc-freq.freq-monthly { background: #fce7f3; color: #db2777; }
+
+  /* ───── Low Compliance Alert ───── */
+  .alert-bar {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: #92400e;
+  }
+  .alert-bar .alert-icon { font-size: 16px; }
+  .alert-bar .alert-rule { font-weight: 600; }
+  .alert-bar.hidden { display: none; }
+
+  /* ───── Scrollbar ───── */
+  .matrix-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+  .matrix-scroll::-webkit-scrollbar-track { background: #f5f5f5; }
+  .matrix-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+  .matrix-scroll::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+  /* ───── Tooltip ───── */
+  .tooltip-wrapper { position: relative; }
+  .tooltip-wrapper .tooltip-text {
+    visibility: hidden;
+    background: #333;
+    color: #fff;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .tooltip-wrapper:hover .tooltip-text { visibility: visible; }
+
+  /* ───── Responsive ───── */
+  @media (max-width: 1100px) {
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───── Sidebar ───── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">N</div>
+    <span>NRS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10.5L10 4l7 6.5"/><path d="M5 9.5V16h3.5v-4h3v4H15V9.5"/></svg>
+      홈
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>
+      목표
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M3 8h14M7 4v4M13 4v4"/></svg>
+      할 일
+    </a>
+    <a class="nav-item active" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 10a3 3 0 106 0 3 3 0 00-6 0z"/><path d="M4 16c0-2.2 2.7-4 6-4s6 1.8 6 4"/></svg>
+      팀
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h12M4 10h12M4 15h8"/></svg>
+      회의
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>
+      협업
+    </a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M7 8h6M7 12h4"/></svg>
+      업무 도구
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M6 10h2v4H6zM9 8h2v6H9zM12 9h2v5h-2z"/></svg>
+      대시보드
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M6 13l4 4 4-4"/></svg>
+      성장
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="avatar">강</div>
+      <div class="user-info">
+        <span class="user-name">강희용</span>
+        <span class="user-email">khy0218@midasit.com</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ───── Main ───── -->
+<div class="main">
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="top-header-row">
+      <div class="team-title">HRP개발팀</div>
+      <div class="header-actions">
+        <div class="team-avatars">
+          <div class="av" style="background:#6366f1;">고</div>
+          <div class="av" style="background:#f59e0b;">박</div>
+          <div class="av" style="background:#22c55e;">김</div>
+          <div class="av" style="background:#ec4899;">최</div>
+          <div class="av av-more">+8</div>
+        </div>
+        <button class="btn-setting">⚙ 설정</button>
+        <button class="btn-tutorial">ⓘ 튜토리얼</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab">성과 인사이트</div>
+      <div class="tab">전체 업무</div>
+      <div class="tab">간트 차트</div>
+      <div class="tab">팀원 하루</div>
+      <div class="tab">팀원 일지</div>
+      <div class="tab active" onclick="location.href='/groundrule.html'">그라운드룰</div>
+      <div class="tab" onclick="location.href='/groundrule2.html'">그라운드룰2</div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+    <!-- Date Bar -->
+    <div class="date-bar">
+      <button class="arrow" onclick="changeDate(-1)">‹</button>
+      <span class="date-text" id="dateText">2026년 3월 5일 (목)</span>
+      <button class="arrow" onclick="changeDate(1)">›</button>
+      <button class="btn-today" onclick="goToday()">오늘</button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="label">전체 준수율</div>
+        <div class="value green" id="totalRate">87%</div>
+        <div class="sub">해당 항목 기준</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">오늘 해당 규칙</div>
+        <div class="value blue" id="totalRules">8</div>
+        <div class="sub">전체 13개 중</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">미준수 건수</div>
+        <div class="value red" id="totalViolations">7</div>
+        <div class="sub">4명의 팀원</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">모니터링 대상</div>
+        <div class="value orange" id="lowRules">1</div>
+        <div class="sub">준수율 70% 미만 규칙</div>
+      </div>
+    </div>
+
+    <!-- Low Compliance Alert -->
+    <div class="alert-bar" id="alertBar">
+      <span class="alert-icon">⚠</span>
+      <span>준수율 낮은 규칙: </span>
+      <span class="alert-rule" id="alertRuleName">업무 요청시 타깃날짜 지정 or 수명 시 타깃날짜 엄수</span>
+      <span> — 준수율 <strong id="alertRuleRate">58%</strong></span>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div style="display:flex; gap:16px; align-items:center;">
+        <div class="filter-group" id="groupFilter">
+          <span class="filter-label">그룹</span>
+          <span class="chip active" data-filter="group" data-value="all">전체</span>
+        </div>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="viewTable" onclick="switchView('table')" title="표 보기">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M2 6h12M2 10h12M6 2v12M10 2v12"/></svg>
+        </button>
+        <button class="view-btn" id="viewCard" onclick="switchView('card')" title="카드 보기">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table View -->
+    <div class="matrix-wrapper" id="tableView">
+      <div class="matrix-scroll" id="matrixScroll">
+        <table class="matrix-table" id="matrixTable">
+          <thead id="matrixHead"></thead>
+          <tbody id="matrixBody"></tbody>
+          <tfoot id="matrixFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Card View -->
+    <div class="person-view" id="cardView">
+      <div class="person-cards" id="personCards"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ───
+const members = [
+  { name: '고희중', role: 'leader', dept: '경영전략실장' },
+  { name: '박민호', role: 'member', dept: '마케팅 기획실' },
+  { name: '김대윤', role: 'member', dept: 'HRP개발팀' },
+  { name: '최준원', role: 'member', dept: 'HRP개발팀' },
+  { name: '신호찬', role: 'member', dept: 'HRP개발팀' },
+  { name: '이정원', role: 'member', dept: '마케팅 기획실' },
+  { name: '안장우', role: 'member', dept: '마케팅 기획실' },
+  { name: '임정민', role: 'member', dept: 'HRP개발팀' },
+  { name: '이현우', role: 'member', dept: '마케팅 기획실' },
+  { name: '조성훈', role: 'member', dept: '마케팅 기획실' },
+  { name: '이정원B', role: 'member', dept: 'HRP개발팀' },
+  { name: '박민호B', role: 'member', dept: 'HRP개발팀' },
+];
+
+const rules = [
+  { id: 1,  group: 0,  text: '모든 회의 시 TIRO를 사용하고, 네이밍 룰을 지킨다.',                       detail: 'TIRO 링크 공유',      target: 'all' },
+  { id: 2,  group: 0,  text: '업무 요청시 타깃날짜 지정 or 수명 시 타깃날짜 엄수',                       detail: '지연 시 사전 합의',     target: 'all' },
+  { id: 3,  group: 1,   text: '일일업무 공유 및 "핵심과제 & 고객가치" 작성',                              detail: '팀즈 공유',            target: 'all' },
+  { id: 4,  group: 1,   text: 'NRS 성과 입력',                                                          detail: '',                    target: 'all' },
+  { id: 5,  group: 1,   text: 'CHO식 회고',                                                              detail: '팀즈 공유',            target: 'all' },
+  { id: 6,  group: 1,   text: '금일 회의 리뷰 및 수영업무 현황 업데이트',                                   detail: '',                    target: 'all' },
+  { id: 7,  group: 2,  text: '핵심과제 점검',                                                            detail: 'WBS 점검 및 업데이트', target: 'all' },
+  { id: 8,  group: 2,  text: '경전실 오프라인 집단회고',                                                   detail: 'KPT 중심',           target: 'all' },
+  { id: 9,  group: 3, text: 'CHO안 학습',                                                              detail: '자인학습회',           target: 'all' },
+  { id: 10, group: 3, text: '장기업무 일정준수',                                                         detail: '자기진단(+2), 하향진단(+4), 최종진단(+5), 일정팀 리포트(+10)', target: 'all' },
+  { id: 11, group: 3, text: '매월 3주차에 익월 주요업무 리스트업',                                         detail: '경전실, 전사 관점',    target: 'leader' },
+  { id: 12, group: 3, text: '자동화/혁신화 아이템 1개 발굴 및 실행',                                       detail: '',                   target: 'member' },
+  { id: 13, group: 3, text: '보고/발표 자료의 템플릿화',                                                   detail: '디자인보다는 컨텐츠 관점', target: 'all' },
+];
+
+const groups = [
+  { name: '상시 지켜야할 것', color: '#7c3aed', bg: '#ede9fe' },
+  { name: '매일 해야할 것', color: '#2563eb', bg: '#dbeafe' },
+  { name: '매주 해야할 것', color: '#d97706', bg: '#fef3c7' },
+  { name: '매월 해야할 것', color: '#db2777', bg: '#fce7f3' },
+];
+const avatarColors = ['#6366f1','#f59e0b','#22c55e','#ec4899','#3b82f6','#ef4444','#14b8a6','#8b5cf6','#f97316','#06b6d4','#e11d48','#84cc16'];
+
+// Generate random compliance data
+function generateData() {
+  const data = {};
+  rules.forEach(r => {
+    data[r.id] = {};
+    members.forEach((m, mi) => {
+      // Determine if rule applies today
+      const applies = isRuleApplicableToday(r);
+      const roleMatch = r.target === 'all' || (r.target === 'leader' && m.role === 'leader') || (r.target === 'member' && m.role === 'member');
+      if (!applies || !roleMatch) {
+        data[r.id][mi] = '-';
+      } else {
+        // Random compliance with bias toward compliance
+        const rand = Math.random();
+        if (r.id === 2) { // Make rule 2 have lower compliance for demo
+          data[r.id][mi] = rand < 0.42 ? 'X' : 'O';
+        } else {
+          data[r.id][mi] = rand < 0.13 ? 'X' : 'O';
+        }
+      }
+    });
+  });
+  return data;
+}
+
+function isRuleApplicableToday(rule) {
+  if (rule.group === 0) return true;        // 상시
+  if (rule.group === 1) return true;        // 매일
+  if (rule.group === 2) return new Date().getDay() === 5; // 매주 (금요일)
+  if (rule.group === 3) return true;        // 매월 (simplified)
+  return true;
+}
+
+let complianceData = generateData();
+let currentFilter = { group: 'all' };
+let currentView = 'table';
+let collapsedGroups = {};
+
+// ─── Render ───
+function getFilteredRules() {
+  return rules.filter(r => {
+    if (currentFilter.group !== 'all' && r.group !== parseInt(currentFilter.group)) return false;
+    return true;
+  });
+}
+
+function getFilteredMembers() {
+  return members.map((m, i) => ({ ...m, originalIndex: i }));
+}
+
+function renderMatrix() {
+  const filteredRules = getFilteredRules();
+  const filteredMembers = getFilteredMembers();
+
+  // Head
+  let headHtml = '<tr><th>그라운드룰</th>';
+  filteredMembers.forEach((m, i) => {
+    headHtml += `<th>
+      <div class="member-name">${m.name.replace('B','')}</div>
+      <div class="member-role">${m.role === 'leader' ? '리더' : '구성원'}</div>
+    </th>`;
+  });
+  headHtml += '<th>준수율</th></tr>';
+  document.getElementById('matrixHead').innerHTML = headHtml;
+
+  // Body - grouped
+  let bodyHtml = '';
+  const grouped = {};
+  groups.forEach((g, i) => { grouped[i] = []; });
+  filteredRules.forEach(r => {
+    if (grouped[r.group] !== undefined) grouped[r.group].push(r);
+  });
+
+  groups.forEach((g, gi) => {
+    const groupRules = grouped[gi];
+    if (!groupRules || groupRules.length === 0) return;
+    const collapsed = collapsedGroups[gi];
+    const chevronClass = collapsed ? 'chevron collapsed' : 'chevron';
+    bodyHtml += `<tr class="group-row" onclick="toggleGroup(${gi})">
+      <td colspan="${filteredMembers.length + 2}">
+        <span class="${chevronClass}">▾</span>
+        <span class="group-badge" style="background:${g.bg};color:${g.color}">${g.name}</span>
+        <span class="group-count">${groupRules.length}개 규칙</span>
+      </td>
+    </tr>`;
+    if (!collapsed) {
+      groupRules.forEach(r => {
+        // Calculate rate for this rule
+        let total = 0, comply = 0;
+        filteredMembers.forEach(m => {
+          const val = complianceData[r.id][m.originalIndex];
+          if (val === 'O') { total++; comply++; }
+          else if (val === 'X') { total++; }
+        });
+        const rate = total > 0 ? Math.round(comply / total * 100) : null;
+        const rateClass = rate === null ? '' : rate >= 90 ? 'high' : rate >= 70 ? 'mid' : 'low';
+
+        bodyHtml += '<tr>';
+        bodyHtml += `<td>
+          <div class="rule-name">
+            <span class="rule-text">${r.text}</span>
+            ${r.detail ? `<span class="rule-detail">${r.detail}</span>` : ''}
+          </div>
+        </td>`;
+        filteredMembers.forEach(m => {
+          const val = complianceData[r.id][m.originalIndex];
+          if (val === 'O') {
+            bodyHtml += '<td><span class="cell comply">✓</span></td>';
+          } else if (val === 'X') {
+            bodyHtml += '<td><span class="cell violate">✗</span></td>';
+          } else {
+            bodyHtml += '<td><span class="cell na">—</span></td>';
+          }
+        });
+        bodyHtml += `<td><span class="rate ${rateClass}">${rate !== null ? rate + '%' : '—'}</span></td>`;
+        bodyHtml += '</tr>';
+      });
+    }
+  });
+  document.getElementById('matrixBody').innerHTML = bodyHtml;
+
+  // Foot
+  let footHtml = '<tr><td>개인별 준수율</td>';
+  filteredMembers.forEach(m => {
+    let total = 0, comply = 0;
+    filteredRules.forEach(r => {
+      const val = complianceData[r.id][m.originalIndex];
+      if (val === 'O') { total++; comply++; }
+      else if (val === 'X') { total++; }
+    });
+    const rate = total > 0 ? Math.round(comply / total * 100) : null;
+    const rateClass = rate === null ? '' : rate >= 90 ? 'high' : rate >= 70 ? 'mid' : 'low';
+    footHtml += `<td><span class="rate ${rateClass}">${rate !== null ? rate + '%' : '—'}</span></td>`;
+  });
+
+  // Overall
+  let oTotal = 0, oComply = 0;
+  filteredRules.forEach(r => {
+    filteredMembers.forEach(m => {
+      const val = complianceData[r.id][m.originalIndex];
+      if (val === 'O') { oTotal++; oComply++; }
+      else if (val === 'X') { oTotal++; }
+    });
+  });
+  const oRate = oTotal > 0 ? Math.round(oComply / oTotal * 100) : 0;
+  const oRateClass = oRate >= 90 ? 'high' : oRate >= 70 ? 'mid' : 'low';
+  footHtml += `<td><span class="rate ${oRateClass}">${oRate}%</span></td></tr>`;
+  document.getElementById('matrixFoot').innerHTML = footHtml;
+
+  // Update summary
+  updateSummary(filteredRules, filteredMembers);
+}
+
+function renderCardView() {
+  const filteredRules = getFilteredRules();
+  const filteredMembers = getFilteredMembers();
+  let html = '';
+
+  filteredMembers.forEach((m, mi) => {
+    let total = 0, comply = 0, violate = 0;
+    filteredRules.forEach(r => {
+      const val = complianceData[r.id][m.originalIndex];
+      if (val === 'O') { total++; comply++; }
+      else if (val === 'X') { total++; violate++; }
+    });
+    const rate = total > 0 ? Math.round(comply / total * 100) : null;
+    const rateClass = rate === null ? '' : rate >= 90 ? 'high' : rate >= 70 ? 'mid' : 'low';
+
+    html += `<div class="person-card">
+      <div class="person-card-header">
+        <div class="pc-avatar" style="background:${avatarColors[m.originalIndex % avatarColors.length]}">${m.name[0]}</div>
+        <div class="pc-info">
+          <div class="pc-name">${m.name.replace('B','')}</div>
+          <div class="pc-role">${m.dept} · ${m.role === 'leader' ? '리더' : '구성원'}</div>
+        </div>
+        <div class="pc-rate rate ${rateClass}">${rate !== null ? rate + '%' : '—'}</div>
+      </div>
+      <div class="person-card-rules">`;
+
+    filteredRules.forEach(r => {
+      const val = complianceData[r.id][m.originalIndex];
+      const statusClass = val === 'O' ? 'comply' : val === 'X' ? 'violate' : 'na';
+      const statusIcon = val === 'O' ? '✓' : val === 'X' ? '✗' : '—';
+      const g = groups[r.group];
+      html += `<div class="pc-rule">
+        <span class="pc-status ${statusClass}">${statusIcon}</span>
+        <span class="pc-rule-text">${r.text}</span>
+        <span class="pc-freq" style="background:${g.bg};color:${g.color}">${g.name}</span>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  document.getElementById('personCards').innerHTML = html;
+}
+
+function updateSummary(filteredRules, filteredMembers) {
+  let oTotal = 0, oComply = 0, violations = 0;
+  let violators = new Set();
+  let lowRules = 0;
+  let lowestRule = null, lowestRate = 100;
+
+  let applicableRuleCount = 0;
+  filteredRules.forEach(r => {
+    let rTotal = 0, rComply = 0;
+    filteredMembers.forEach(m => {
+      const val = complianceData[r.id][m.originalIndex];
+      if (val === 'O') { rTotal++; rComply++; oTotal++; oComply++; }
+      else if (val === 'X') { rTotal++; oTotal++; violations++; violators.add(m.originalIndex); }
+    });
+    if (rTotal > 0) {
+      applicableRuleCount++;
+      const rate = Math.round(rComply / rTotal * 100);
+      if (rate < 70) lowRules++;
+      if (rate < lowestRate) { lowestRate = rate; lowestRule = r; }
+    }
+  });
+
+  const overallRate = oTotal > 0 ? Math.round(oComply / oTotal * 100) : 0;
+  document.getElementById('totalRate').textContent = overallRate + '%';
+  document.getElementById('totalRules').textContent = applicableRuleCount;
+  document.querySelector('#totalRules').closest('.summary-card').querySelector('.sub').textContent = `전체 ${filteredRules.length}개 중`;
+  document.getElementById('totalViolations').textContent = violations;
+  document.querySelector('#totalViolations').closest('.summary-card').querySelector('.sub').textContent = `${violators.size}명의 팀원`;
+  document.getElementById('lowRules').textContent = lowRules;
+
+  if (lowestRule && lowestRate < 80) {
+    document.getElementById('alertBar').classList.remove('hidden');
+    document.getElementById('alertRuleName').textContent = lowestRule.text;
+    document.getElementById('alertRuleRate').textContent = lowestRate + '%';
+  } else {
+    document.getElementById('alertBar').classList.add('hidden');
+  }
+}
+
+// ─── Interactions ───
+function toggleGroup(groupIndex) {
+  collapsedGroups[groupIndex] = !collapsedGroups[groupIndex];
+  renderMatrix();
+}
+
+function switchView(view) {
+  currentView = view;
+  if (view === 'table') {
+    document.getElementById('tableView').classList.remove('hidden');
+    document.getElementById('cardView').classList.remove('active');
+    document.getElementById('viewTable').classList.add('active');
+    document.getElementById('viewCard').classList.remove('active');
+    renderMatrix();
+  } else {
+    document.getElementById('tableView').classList.add('hidden');
+    document.getElementById('cardView').classList.add('active');
+    document.getElementById('viewTable').classList.remove('active');
+    document.getElementById('viewCard').classList.add('active');
+    renderCardView();
+  }
+}
+
+// Dynamic group chips
+function initGroupChips() {
+  const container = document.getElementById('groupFilter');
+  groups.forEach((g, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.dataset.filter = 'group';
+    chip.dataset.value = i;
+    chip.textContent = g.name;
+    chip.title = g.name; // 전체 이름 툴팁
+    container.appendChild(chip);
+  });
+  // Bind events
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter.group = chip.dataset.value === 'all' ? 'all' : chip.dataset.value;
+      if (currentView === 'table') renderMatrix();
+      else renderCardView();
+    });
+  });
+}
+initGroupChips();
+
+// Date
+const dayNames = ['일','월','화','수','목','금','토'];
+let currentDate = new Date(2026, 2, 5); // March 5, 2026
+
+function updateDateDisplay() {
+  const y = currentDate.getFullYear();
+  const m = currentDate.getMonth() + 1;
+  const d = currentDate.getDate();
+  const day = dayNames[currentDate.getDay()];
+  document.getElementById('dateText').textContent = `${y}년 ${m}월 ${d}일 (${day})`;
+}
+
+function changeDate(delta) {
+  currentDate.setDate(currentDate.getDate() + delta);
+  updateDateDisplay();
+  complianceData = generateData(); // Regenerate for new date
+  if (currentView === 'table') renderMatrix();
+  else renderCardView();
+}
+
+function goToday() {
+  currentDate = new Date(2026, 2, 5);
+  updateDateDisplay();
+  complianceData = generateData();
+  if (currentView === 'table') renderMatrix();
+  else renderCardView();
+}
+
+// ─── Init ───
+renderMatrix();
+</script>
+</body>
+</html>

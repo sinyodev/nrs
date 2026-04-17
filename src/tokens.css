@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/* ── 단일 디자인 토큰 소스 ──
+ * 캡처: src/captured/tokens.json
+ * 출처: https://hrp.newrrow.com/nrs/working-station/goals
+ *
+ * Tailwind v4 — @theme 안의 모든 변수가 자동으로 유틸리티 생성됨
+ *   --color-brand-500    → bg-brand-500, text-brand-500, border-brand-500
+ *   --spacing-md         → p-md, m-md, gap-md
+ *   --radius-md          → rounded-md
+ */
+
+@theme {
+  /* ── Brand ── */
+  --color-brand-50:  #f0f9ff;
+  --color-brand-500: #2ca4fb;
+  --color-brand-grad-start: #20c997;
+  --color-brand-grad-end:   #01c3d5;
+
+  /* ── Neutral (text/bg) ── */
+  --color-ink-100: #343434;
+  --color-ink-80:  #474747;
+  --color-ink-60:  #848484;
+  --color-ink-40:  #aeaeae;
+
+  --color-surface:    #ffffff;
+  --color-surface-2:  #f9f9f9;
+  --color-surface-3:  #f5f5f5;
+  --color-surface-4:  #f0f0f0;
+  --color-surface-5:  #eaeaea;
+
+  --color-line:     #e5e7eb;
+  --color-line-mid: #d2d2d2;
+
+  /* ── Goal Type Badges ── */
+  --color-objective-bg:   #fff0f3;
+  --color-objective-text: #ef2e62;
+  --color-keyresult-bg:   #f2f1fe;
+  --color-keyresult-text: #6358d5;
+  --color-initiative-bg:  #e9fafb;
+  --color-initiative-text:#00b6c7;
+
+  /* ── Status Badges ── */
+  --color-status-progress-bg:   #f0f9ff;
+  --color-status-progress-text: #2ca4fb;
+  --color-status-complete-bg:   #e6fef0;
+  --color-status-complete-text: #08bf52;
+
+  /* ── Charts ── */
+  --color-progress-fill: #3982ef;
+
+  /* ── Task Status (텍스트 컬러, 배경 없는 인라인 배지) ── */
+  --color-task-todo:        #474747;
+  --color-task-in-progress: #2ca4fb;
+  --color-task-done:        #08bf52;
+
+  /* ── Task Priority ── */
+  --color-priority-low:    #474747;
+  --color-priority-medium: #2ca4fb;
+  --color-priority-high:   #fd493f;
+
+  /* ── Task Tags ── */
+  --color-key-task:  #f46b1d;   /* 핵심 업무 오렌지 배지 */
+  --color-no-goal:  #474747;   /* 목표 미연결 섹션 */
+
+  /* ── Warn (미연결/주의) ── */
+  --color-warn-bg:     #fff7ed;
+  --color-warn-border: #fdba74;
+  --color-warn-text:   #c2410c;
+
+  /* ── Calendar ── */
+  --color-calendar-event-bg:  #bfdbfe;
+  --color-calendar-event-bar: #2ca4fb;
+  --color-calendar-today:     #2ca4fb;
+
+  /* ── Recommendation (V1 — 가설 검증 변형) ── */
+  --color-impact-fill: #fd493f;       /* 영향력 게이지 채움 */
+  --color-impact-track: #fee4e2;      /* 영향력 게이지 빈 부분 */
+
+  /* ── Typography ── */
+  --font-sans: "Pretendard Variable", "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;
+  --text-md:   16px;
+
+  /* ── Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+
+  /* ── Layout ── */
+  --layout-sidebar-w: 200px;
+  --layout-topbar-h:  48px;
+}
+
+/* Pretendard 가변 폰트가 로드되면 Variable, 아니면 일반으로 fallback */
+html, body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--color-ink-100);
+  background: var(--color-surface-3);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body { margin: 0; }
+
+/* 표 안의 한글 가독성 */
+table { font-feature-settings: "tnum" on, "lnum" on; }
+
+/* 그라디언트 유틸 (브랜드 그라디언트는 자주 등장) */
+.bg-brand-gradient {
+  background: linear-gradient(
+    90deg,
+    var(--color-brand-grad-start) 0%,
+    var(--color-brand-grad-end) 100%
+  );
+}

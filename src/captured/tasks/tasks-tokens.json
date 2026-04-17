@@ -1,0 +1,234 @@
+{
+  "meta": {
+    "page": "NRS 할 일 (Tasks)",
+    "url": "https://hrp.newrrow.com/nrs/working-station/tasks",
+    "captured": "2026-04-17",
+    "baseDesignSystem": "목표(Goals) 페이지와 동일한 MUIX 디자인 시스템",
+    "note": "아래는 목표 페이지 대비 할 일 페이지에서 추가/변경된 토큰만 기록"
+  },
+  "colors": {
+    "status": {
+      "대기_todo": {
+        "value": "rgb(71, 71, 71)",
+        "hex": "#474747",
+        "usage": "할 일 상태 - 대기",
+        "type": "text-color"
+      },
+      "진행_in_progress": {
+        "value": "rgb(44, 164, 251)",
+        "hex": "#2ca4fb",
+        "usage": "할 일 상태 - 진행 중",
+        "type": "text-color"
+      },
+      "완료_done": {
+        "value": "rgb(8, 191, 82)",
+        "hex": "#08bf52",
+        "usage": "할 일 상태 - 완료",
+        "type": "text-color"
+      }
+    },
+    "priority": {
+      "보통_medium": {
+        "value": "rgb(44, 164, 251)",
+        "hex": "#2ca4fb",
+        "usage": "우선순위 - 보통",
+        "type": "text-color",
+        "note": "진행 상태와 동일한 파란색 계열"
+      },
+      "높음_high": {
+        "value": "rgb(253, 73, 63)",
+        "hex": "#fd493f",
+        "usage": "우선순위 - 높음",
+        "type": "text-color"
+      },
+      "낮음_low": {
+        "value": "rgb(71, 71, 71)",
+        "hex": "#474747",
+        "usage": "우선순위 - 낮음 (추정, 대기와 동일)",
+        "type": "text-color"
+      }
+    },
+    "badge": {
+      "핵심업무_key_task": {
+        "value": "rgb(244, 107, 29)",
+        "hex": "#f46b1d",
+        "usage": "핵심 업무 배지 텍스트 색상",
+        "type": "text-color",
+        "muixToken": "--muix-base-color-accent-orange-500 (추정)"
+      },
+      "목표미연결_no_goal": {
+        "value": "rgb(71, 71, 71)",
+        "hex": "#474747",
+        "usage": "목표 미연결 섹션 헤더",
+        "type": "text-color"
+      }
+    },
+    "calendar": {
+      "calendar_event_bg": {
+        "value": "rgb(191, 219, 254)",
+        "hex": "#bfdbfe",
+        "usage": "캘린더 이벤트 블록 배경 (오늘 날짜 기준)",
+        "type": "background-color"
+      },
+      "calendar_today_highlight": {
+        "value": "rgb(44, 164, 251)",
+        "hex": "#2ca4fb",
+        "usage": "캘린더 오늘 날짜 원형 하이라이트",
+        "type": "background-color"
+      }
+    }
+  },
+  "typography": {
+    "task_badge_text": {
+      "fontSize": "12px",
+      "fontWeight": "600",
+      "usage": "상태/우선순위/핵심업무 배지 공통 타이포"
+    },
+    "goal_section_title": {
+      "fontSize": "14px",
+      "fontWeight": "600",
+      "usage": "목표 그룹 섹션 헤더 텍스트"
+    },
+    "task_item_title": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "usage": "할 일 아이템 제목"
+    },
+    "task_progress_counter": {
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "usage": "완료/전체 카운터 (예: 9/34)"
+    }
+  },
+  "components": {
+    "task_item_row": {
+      "height": "auto (min ~40px)",
+      "backgroundColor": "transparent",
+      "hoverBg": "rgb(249, 250, 251)",
+      "borderBottom": "1px solid rgb(229, 231, 235)"
+    },
+    "goal_section_group": {
+      "structure": "collapsible accordion",
+      "headerBg": "transparent",
+      "indicator": "chevron icon (접기/펼치기)"
+    },
+    "status_badge": {
+      "type": "inline text badge (no background)",
+      "fontSize": "12px",
+      "fontWeight": "600",
+      "values": [
+        "대기",
+        "진행",
+        "완료"
+      ]
+    },
+    "priority_badge": {
+      "type": "inline text badge (no background)",
+      "fontSize": "12px",
+      "fontWeight": "600",
+      "values": [
+        "낮음",
+        "보통",
+        "높음"
+      ]
+    },
+    "key_task_badge": {
+      "type": "inline text badge",
+      "color": "#f46b1d",
+      "label": "핵심 업무"
+    },
+    "due_date_field": {
+      "format": "YY.MM.DD",
+      "icon": "calendar icon (📅)",
+      "emptyState": "미지정",
+      "overdueBehavior": "날짜 텍스트 색상 변경 추정"
+    },
+    "subtask_counter": {
+      "type": "number badge",
+      "usage": "하위 업무 개수 표시 (예: 11, 3, 2)",
+      "position": "task title 우측"
+    },
+    "weekly_calendar": {
+      "type": "week view calendar",
+      "eventBlock": {
+        "bg": "#bfdbfe",
+        "borderLeft": "2px solid #2ca4fb (추정)"
+      },
+      "todayHighlight": "#2ca4fb 원형"
+    },
+    "task_recommendation_panel": {
+      "label": "오늘의 업무 추천",
+      "emptyState": "오늘은 추천할 업무가 없어요.",
+      "collapsible": true
+    }
+  },
+  "fields_analysis": {
+    "goal_connection": {
+      "exists": true,
+      "mechanism": "목표별 섹션 그룹핑",
+      "unlinked_label": "목표 미연결",
+      "note": "할 일 아이템은 반드시 하나의 목표(Goal)에 속하거나 '목표 미연결' 섹션에 분류됨. 섹션 헤더가 곧 연결된 목표명"
+    },
+    "priority_field": {
+      "exists": true,
+      "field_name": "우선순위",
+      "values": [
+        "낮음",
+        "보통",
+        "높음"
+      ],
+      "display": "inline badge (색상으로 구분)"
+    },
+    "key_task_flag": {
+      "exists": true,
+      "field_name": "핵심 업무",
+      "type": "boolean badge",
+      "color": "#f46b1d"
+    },
+    "due_date": {
+      "exists": true,
+      "field_name": "마감일 (due date)",
+      "format": "YY.MM.DD",
+      "empty_value": "미지정",
+      "icon": "calendar"
+    },
+    "status": {
+      "exists": true,
+      "field_name": "상태",
+      "values": [
+        "대기 (todo)",
+        "진행 (in progress)",
+        "완료 (done)"
+      ]
+    },
+    "subtask_count": {
+      "exists": true,
+      "field_name": "하위 업무 수",
+      "type": "integer counter badge"
+    },
+    "estimated_time": {
+      "exists": false,
+      "note": "현재 화면에서 시간 추정(estimated time) 필드는 미발견. 캘린더에서 시간 블록으로 표현되는 것으로 대체"
+    },
+    "goal_objective_ref": {
+      "exists": true,
+      "type": "섹션 그룹핑 방식",
+      "note": "각 목표 이름이 섹션 헤더 역할. (일잘사)목표명, (일잘팀)목표명 형식"
+    },
+    "impact_importance": {
+      "exists": false,
+      "note": "영향력/중요도 별도 필드는 현재 화면에서 미발견"
+    },
+    "achievement_registration": {
+      "exists": true,
+      "field_name": "성과 등록",
+      "type": "action button",
+      "note": "각 할 일 아이템마다 성과 등록 버튼 존재"
+    },
+    "progress_counter": {
+      "exists": true,
+      "format": "완료수/전체수 (예: 9/34)",
+      "position": "목표 섹션 헤더 우측"
+    }
+  }
+}

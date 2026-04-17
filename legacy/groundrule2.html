@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRS - 그라운드룰2</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f6fa;
+    color: #1e1e1e;
+    font-size: 13px;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ───── Sidebar ───── */
+  .sidebar {
+    width: 180px; min-width: 180px; background: #fff;
+    border-right: 1px solid #e8e8ec;
+    display: flex; flex-direction: column; height: 100vh; z-index: 10;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 8px;
+    padding: 18px 20px 14px; font-weight: 700; font-size: 16px;
+  }
+  .sidebar-logo .logo-icon {
+    width: 28px; height: 28px; background: #1e1e1e; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 14px;
+  }
+  .sidebar-nav { flex: 1; padding: 4px 8px; overflow-y: auto; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: 8px; color: #5f5f6b; cursor: pointer; font-size: 13.5px;
+    transition: background .15s; text-decoration: none;
+  }
+  .nav-item:hover { background: #f5f6fa; }
+  .nav-item.active { background: #f0f0f5; color: #1e1e1e; font-weight: 600; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-divider { height: 1px; background: #e8e8ec; margin: 6px 12px; }
+  .sidebar-bottom { padding: 12px; border-top: 1px solid #e8e8ec; }
+  .sidebar-user { display: flex; align-items: center; gap: 8px; padding: 8px; font-size: 12px; }
+  .sidebar-user .avatar {
+    width: 30px; height: 30px; border-radius: 50%; background: #ddd;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #555;
+  }
+  .sidebar-user .user-info { display: flex; flex-direction: column; }
+  .sidebar-user .user-name { font-weight: 600; color: #1e1e1e; font-size: 12.5px; }
+  .sidebar-user .user-email { color: #8e8e9a; font-size: 11px; }
+
+  /* ───── Main ───── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .top-header { background: #fff; border-bottom: 1px solid #e8e8ec; padding: 18px 28px 0; }
+  .top-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .team-title { font-size: 18px; font-weight: 700; }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .team-avatars { display: flex; align-items: center; }
+  .team-avatars .av {
+    width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff;
+    margin-left: -8px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: #fff;
+  }
+  .team-avatars .av:first-child { margin-left: 0; }
+  .team-avatars .av-more { background: #e8e8ec; color: #555; font-size: 10px; font-weight: 600; }
+  .btn-setting {
+    display: flex; align-items: center; gap: 5px; padding: 6px 14px;
+    border-radius: 8px; border: 1px solid #e0e0e5; background: #fff;
+    font-size: 12.5px; color: #555; cursor: pointer;
+  }
+  .btn-tutorial {
+    display: flex; align-items: center; gap: 5px; padding: 6px 14px;
+    border-radius: 8px; border: 1px solid #e0e0e5; background: #fff;
+    font-size: 12.5px; color: #f59e0b; cursor: pointer;
+  }
+  .tabs { display: flex; gap: 0; }
+  .tab {
+    padding: 10px 16px; color: #8e8e9a; font-size: 13.5px; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap;
+  }
+  .tab:hover { color: #555; }
+  .tab.active { color: #1e1e1e; font-weight: 600; border-bottom-color: #1e1e1e; }
+
+  /* ───── Content ───── */
+  .content { flex: 1; overflow: auto; padding: 20px 28px 40px; }
+
+  /* ───── Summary Row ───── */
+  .summary-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 20px;
+  }
+  .summary-card {
+    background: #fff; border-radius: 12px; padding: 18px 20px;
+    border: 1px solid #e8e8ec;
+  }
+  .summary-card .s-label { font-size: 12px; color: #8e8e9a; margin-bottom: 6px; }
+  .summary-card .s-value { font-size: 28px; font-weight: 700; }
+  .summary-card .s-sub { font-size: 11.5px; color: #8e8e9a; margin-top: 4px; }
+  .s-value.green { color: #16a34a; }
+  .s-value.red { color: #ef4444; }
+  .s-value.blue { color: #3b82f6; }
+
+  /* ───── Group Section ───── */
+  .rule-group {
+    background: #fff; border-radius: 12px; border: 1px solid #e8e8ec;
+    margin-bottom: 16px; overflow: hidden;
+  }
+
+  /* Group Header — two rows */
+  .group-header {
+    border-bottom: 1px solid #f0f0f3;
+  }
+  .group-header-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px 0; cursor: pointer; user-select: none;
+  }
+  .group-header-top:hover { background: #fafbfc; }
+  .group-header-left {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .group-chevron {
+    font-size: 11px; color: #8e8e9a; transition: transform .2s;
+    width: 16px; text-align: center;
+  }
+  .group-chevron.collapsed { transform: rotate(-90deg); }
+  .group-name { font-size: 14px; font-weight: 700; color: #1e1e1e; }
+  .group-rule-count {
+    font-size: 11.5px; color: #8e8e9a; font-weight: 400;
+    background: #f0f0f5; padding: 2px 8px; border-radius: 10px;
+  }
+  .group-header-right {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .group-rate { font-size: 13px; font-weight: 700; }
+  .group-rate.high { color: #16a34a; }
+  .group-rate.mid { color: #f59e0b; }
+  .group-rate.low { color: #ef4444; }
+  .group-bar-mini {
+    width: 80px; height: 6px; background: #f0f0f3; border-radius: 3px; overflow: hidden;
+  }
+  .group-bar-mini-fill {
+    height: 100%; border-radius: 3px; transition: width .3s;
+  }
+
+  /* Period chips inside group header */
+  .group-header-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 20px 12px;
+  }
+  .group-period-chips {
+    display: flex; gap: 4px; align-items: center;
+  }
+  .gp-chip {
+    padding: 3px 12px; border-radius: 14px; border: 1px solid #e0e0e5;
+    background: #fff; font-size: 11.5px; color: #8e8e9a; cursor: pointer;
+    transition: all .12s; line-height: 1.4;
+  }
+  .gp-chip:hover { border-color: #bbb; color: #555; }
+  .gp-chip.active {
+    background: #1e1e1e; color: #fff; border-color: #1e1e1e;
+  }
+  .group-period-info {
+    font-size: 11px; color: #b0b0ba;
+  }
+  .group-period-info strong { color: #8e8e9a; }
+
+  /* ───── Rule Item ───── */
+  .rule-list { padding: 0; }
+  .rule-list.collapsed { display: none; }
+  .rule-item {
+    padding: 14px 20px; border-bottom: 1px solid #f5f5f8;
+    transition: background .1s;
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-item:hover { background: #fafbff; }
+  .rule-item-top {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+  }
+  .rule-text { flex: 1; font-size: 13px; font-weight: 500; color: #1e1e1e; }
+  .rule-detail-label { font-size: 11px; color: #8e8e9a; font-weight: 400; }
+  .rule-stats {
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .rule-count { font-size: 13px; font-weight: 700; min-width: 60px; text-align: right; }
+  .rule-rate { font-size: 13px; font-weight: 700; min-width: 44px; text-align: right; }
+  .rule-rate.high { color: #16a34a; }
+  .rule-rate.mid { color: #f59e0b; }
+  .rule-rate.low { color: #ef4444; }
+  .rule-warn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #fef3c7; color: #d97706; font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Progress bar */
+  .progress-row { display: flex; align-items: center; gap: 12px; }
+  .progress-bar {
+    flex: 1; height: 8px; background: #f0f0f3; border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 4px; transition: width .4s ease;
+  }
+  .progress-fill.high { background: #22c55e; }
+  .progress-fill.mid { background: #f59e0b; }
+  .progress-fill.low { background: #ef4444; }
+
+  /* Expand detail */
+  .rule-detail-panel {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed #e8e8ec;
+    display: none;
+  }
+  .rule-detail-panel.open { display: block; }
+  .detail-toggle {
+    font-size: 11.5px; color: #6366f1; cursor: pointer;
+    margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .detail-toggle:hover { text-decoration: underline; }
+
+  /* Member pills */
+  .member-section { margin-bottom: 8px; }
+  .member-section-label { font-size: 11px; color: #8e8e9a; margin-bottom: 6px; font-weight: 600; }
+  .member-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .member-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 16px; font-size: 11.5px; font-weight: 500;
+  }
+  .member-pill.done { background: #dcfce7; color: #15803d; }
+  .member-pill.done .pill-date { color: #4ade80; font-size: 10px; }
+  .member-pill.pending { background: #fef3c7; color: #92400e; }
+
+  /* Inline status */
+  .inline-status { margin-top: 8px; font-size: 11.5px; }
+  .inline-status.pending-list { color: #8e8e9a; }
+  .inline-status.pending-list .names { color: #dc2626; font-weight: 500; }
+  .inline-status.all-done { color: #16a34a; font-weight: 500; }
+
+  /* ───── Scrollbar ───── */
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  .content::-webkit-scrollbar-thumb:hover { background: #bbb; }
+</style>
+</head>
+<body>
+
+<!-- ───── Sidebar ───── -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="logo-icon">N</div><span>NRS</span></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10.5L10 4l7 6.5"/><path d="M5 9.5V16h3.5v-4h3v4H15V9.5"/></svg>홈</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>목표</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M3 8h14M7 4v4M13 4v4"/></svg>할 일</a>
+    <a class="nav-item active" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 10a3 3 0 106 0 3 3 0 00-6 0z"/><path d="M4 16c0-2.2 2.7-4 6-4s6 1.8 6 4"/></svg>팀</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h12M4 10h12M4 15h8"/></svg>회의</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>협업</a>
+    <div class="nav-divider"></div>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M7 8h6M7 12h4"/></svg>업무 도구</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M6 10h2v4H6zM9 8h2v6H9zM12 9h2v5h-2z"/></svg>대시보드</a>
+    <a class="nav-item" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M6 13l4 4 4-4"/></svg>성장</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="avatar">강</div>
+      <div class="user-info">
+        <span class="user-name">강희용</span>
+        <span class="user-email">khy0218@midasit.com</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ───── Main ───── -->
+<div class="main">
+  <header class="top-header">
+    <div class="top-header-row">
+      <div class="team-title">HRP개발팀</div>
+      <div class="header-actions">
+        <div class="team-avatars">
+          <div class="av" style="background:#6366f1;">고</div>
+          <div class="av" style="background:#f59e0b;">박</div>
+          <div class="av" style="background:#22c55e;">김</div>
+          <div class="av" style="background:#ec4899;">최</div>
+          <div class="av av-more">+8</div>
+        </div>
+        <button class="btn-setting">⚙ 설정</button>
+        <button class="btn-tutorial">ⓘ 튜토리얼</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab">성과 인사이트</div>
+      <div class="tab">전체 업무</div>
+      <div class="tab">간트 차트</div>
+      <div class="tab">팀원 하루</div>
+      <div class="tab">팀원 일지</div>
+      <div class="tab" onclick="location.href='/groundrule.html'">그라운드룰</div>
+      <div class="tab active" onclick="location.href='/groundrule2.html'">그라운드룰2</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="summary-row" id="summaryRow"></div>
+    <div id="groupContainer"></div>
+  </div>
+</div>
+
+<script>
+// ─── Data ───
+const members = [
+  { name: '고희중', role: 'leader', dept: '경영전략실장' },
+  { name: '박민호', role: 'member', dept: '마케팅 기획실' },
+  { name: '김대윤', role: 'member', dept: 'HRP개발팀' },
+  { name: '최준원', role: 'member', dept: 'HRP개발팀' },
+  { name: '신호찬', role: 'member', dept: 'HRP개발팀' },
+  { name: '이정원', role: 'member', dept: '마케팅 기획실' },
+  { name: '안장우', role: 'member', dept: '마케팅 기획실' },
+  { name: '임정민', role: 'member', dept: 'HRP개발팀' },
+  { name: '이현우', role: 'member', dept: '마케팅 기획실' },
+  { name: '조성훈', role: 'member', dept: '마케팅 기획실' },
+  { name: '이정원B', role: 'member', dept: 'HRP개발팀' },
+  { name: '박민호B', role: 'member', dept: 'HRP개발팀' },
+];
+
+const groups = [
+  {
+    name: '상시 지켜야할 것',
+    defaultPeriod: 'today',
+    rules: [
+      { id: 1, text: '모든 회의 시 TIRO를 사용하고, 네이밍 룰을 지킨다.', detail: 'TIRO 링크 공유' },
+      { id: 2, text: '업무 요청시 타깃날짜 지정 or 수명 시 타깃날짜 엄수', detail: '지연 시 사전 합의' },
+    ]
+  },
+  {
+    name: '매일 해야할 것',
+    defaultPeriod: 'today',
+    rules: [
+      { id: 3, text: '일일업무 공유 및 "핵심과제 & 고객가치" 작성', detail: '팀즈 공유' },
+      { id: 4, text: 'NRS 성과 입력', detail: '' },
+      { id: 5, text: 'CHO식 회고', detail: '팀즈 공유' },
+      { id: 6, text: '금일 회의 리뷰 및 수영업무 현황 업데이트', detail: '' },
+    ]
+  },
+  {
+    name: '매주 해야할 것',
+    defaultPeriod: 'week',
+    rules: [
+      { id: 7, text: '핵심과제 점검', detail: 'WBS 점검 및 업데이트' },
+      { id: 8, text: '경전실 오프라인 집단회고', detail: 'KPT 중심' },
+    ]
+  },
+  {
+    name: '매월 해야할 것',
+    defaultPeriod: 'month',
+    rules: [
+      { id: 9,  text: 'CHO안 학습', detail: '자인학습회' },
+      { id: 10, text: '장기업무 일정준수', detail: '자기진단(+2), 하향진단(+4), 최종진단(+5), 일정팀 리포트(+10)' },
+      { id: 11, text: '매월 3주차에 익월 주요업무 리스트업', detail: '경전실, 전사 관점' },
+      { id: 12, text: '자동화/혁신화 아이템 1개 발굴 및 실행', detail: '' },
+      { id: 13, text: '보고/발표 자료의 템플릿화', detail: '디자인보다는 컨텐츠 관점' },
+    ]
+  }
+];
+
+// ─── Check Records (simulated BE data) ───
+function generateCheckRecords() {
+  const records = {};
+  const today = new Date(2026, 2, 6);
+  groups.forEach(g => {
+    g.rules.forEach(r => {
+      records[r.id] = {};
+      members.forEach((m, mi) => {
+        const dates = [];
+        for (let d = 1; d <= today.getDate(); d++) {
+          const date = new Date(2026, 2, d);
+          const dow = date.getDay();
+          if (dow === 0 || dow === 6) continue;
+          let prob = 0;
+          if (r.id >= 3 && r.id <= 6) prob = 0.82;
+          else if (r.id <= 2) prob = r.id === 2 ? 0.55 : 0.78;
+          else if (r.id >= 7 && r.id <= 8) prob = (dow === 5) ? 0.85 : 0.02;
+          else prob = 0.15;
+          if (Math.random() < prob) {
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            dates.push(`2026-${mm}-${dd}`);
+          }
+        }
+        records[r.id][mi] = dates;
+      });
+    });
+  });
+  return records;
+}
+const checkRecords = generateCheckRecords();
+
+// ─── State: per-group period ───
+const groupPeriods = {};
+groups.forEach((g, i) => { groupPeriods[i] = g.defaultPeriod; });
+const collapsedGroups = {};
+
+// ─── Period helpers ───
+function getPeriodRange(period) {
+  const today = new Date(2026, 2, 6);
+  if (period === 'today') return { start: new Date(2026,2,6), end: new Date(2026,2,6) };
+  if (period === 'week') {
+    const day = today.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    const start = new Date(today); start.setDate(today.getDate() - diff);
+    return { start, end: new Date(today) };
+  }
+  if (period === 'month') return { start: new Date(2026,2,1), end: new Date(today) };
+  return { start: today, end: today };
+}
+
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDateKR(d) { return `${d.getMonth()+1}/${d.getDate()}`; }
+
+function getCheckedDatesInPeriod(ruleId, memberIdx, period) {
+  const { start, end } = getPeriodRange(period);
+  const dates = checkRecords[ruleId]?.[memberIdx] || [];
+  const s = fmtDate(start), e = fmtDate(end);
+  return dates.filter(d => d >= s && d <= e);
+}
+
+function getRateClass(rate) {
+  return rate >= 90 ? 'high' : rate >= 70 ? 'mid' : 'low';
+}
+
+function getPeriodLabel(period) {
+  const { start, end } = getPeriodRange(period);
+  if (period === 'today') return `오늘 (${fmtDateKR(start)})`;
+  if (period === 'week') return `${fmtDateKR(start)} ~ ${fmtDateKR(end)}`;
+  return `${start.getMonth()+1}월 ${fmtDateKR(start)} ~ ${fmtDateKR(end)}`;
+}
+
+// ─── Render ───
+function render() {
+  let totalDone = 0, totalApplicable = 0, lowRuleCount = 0;
+
+  const groupData = groups.map((g, gi) => {
+    const period = groupPeriods[gi];
+    const rulesData = g.rules.map(r => {
+      let done = 0;
+      const memberStatuses = members.map((m, mi) => {
+        const checked = getCheckedDatesInPeriod(r.id, mi, period);
+        const isDone = checked.length > 0;
+        if (isDone) done++;
+        return { name: m.name.replace('B',''), isDone, lastDate: checked.length ? checked[checked.length-1] : null };
+      });
+      const rate = Math.round(done / members.length * 100);
+      totalDone += done;
+      totalApplicable += members.length;
+      if (rate < 70) lowRuleCount++;
+      return { ...r, done, applicable: members.length, rate, memberStatuses };
+    });
+    const gDone = rulesData.reduce((s,r) => s + r.done, 0);
+    const gTotal = rulesData.reduce((s,r) => s + r.applicable, 0);
+    const groupRate = gTotal > 0 ? Math.round(gDone / gTotal * 100) : 0;
+    return { ...g, rulesData, groupRate, period };
+  });
+
+  const overallRate = totalApplicable > 0 ? Math.round(totalDone / totalApplicable * 100) : 0;
+
+  // Summary
+  document.getElementById('summaryRow').innerHTML = `
+    <div class="summary-card">
+      <div class="s-label">전체 준수율</div>
+      <div class="s-value ${getRateClass(overallRate)}">${overallRate}%</div>
+      <div class="s-sub">각 그룹 기간 기준 합산</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">미완료 건수</div>
+      <div class="s-value red">${totalApplicable - totalDone}</div>
+      <div class="s-sub">전체 ${totalApplicable}건 중</div>
+    </div>
+    <div class="summary-card">
+      <div class="s-label">주의 규칙</div>
+      <div class="s-value ${lowRuleCount > 0 ? 'red' : 'green'}">${lowRuleCount}</div>
+      <div class="s-sub">준수율 70% 미만</div>
+    </div>`;
+
+  // Groups
+  let html = '';
+  groupData.forEach((g, gi) => {
+    const collapsed = collapsedGroups[gi];
+    const rc = getRateClass(g.groupRate);
+    const period = groupPeriods[gi];
+
+    html += `<div class="rule-group">
+      <div class="group-header">
+        <div class="group-header-top" onclick="toggleGroup(${gi})">
+          <div class="group-header-left">
+            <span class="group-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
+            <span class="group-name">${g.name}</span>
+            <span class="group-rule-count">${g.rulesData.length}개</span>
+          </div>
+          <div class="group-header-right">
+            <div class="group-bar-mini"><div class="group-bar-mini-fill ${rc}" style="width:${g.groupRate}%"></div></div>
+            <span class="group-rate ${rc}">${g.groupRate}%</span>
+          </div>
+        </div>
+        <div class="group-header-bottom">
+          <div class="group-period-chips">
+            <span class="gp-chip ${period==='today'?'active':''}" onclick="event.stopPropagation();setGroupPeriod(${gi},'today')">오늘</span>
+            <span class="gp-chip ${period==='week'?'active':''}" onclick="event.stopPropagation();setGroupPeriod(${gi},'week')">이번 주</span>
+            <span class="gp-chip ${period==='month'?'active':''}" onclick="event.stopPropagation();setGroupPeriod(${gi},'month')">이번 달</span>
+          </div>
+          <span class="group-period-info">${getPeriodLabel(period)}</span>
+        </div>
+      </div>
+      <div class="rule-list ${collapsed ? 'collapsed' : ''}">`;
+
+    g.rulesData.forEach(r => {
+      const rc2 = getRateClass(r.rate);
+      const done = r.memberStatuses.filter(m => m.isDone);
+      const pending = r.memberStatuses.filter(m => !m.isDone);
+
+      html += `<div class="rule-item">
+        <div class="rule-item-top">
+          <div class="rule-text">${r.text}${r.detail ? `<div class="rule-detail-label">${r.detail}</div>` : ''}</div>
+          <div class="rule-stats">
+            ${r.rate < 70 ? '<span class="rule-warn">!</span>' : ''}
+            <span class="rule-count">${r.done}/${r.applicable}명</span>
+            <span class="rule-rate ${rc2}">${r.rate}%</span>
+          </div>
+        </div>
+        <div class="progress-row"><div class="progress-bar"><div class="progress-fill ${rc2}" style="width:${r.rate}%"></div></div></div>`;
+
+      if (r.rate === 100) {
+        html += `<div class="inline-status all-done">✓ 전원 완료</div>`;
+      } else if (pending.length <= 6) {
+        html += `<div class="inline-status pending-list">미완: <span class="names">${pending.map(m=>m.name).join(', ')}</span></div>`;
+      } else {
+        html += `<div class="inline-status pending-list">미완: <span class="names">${pending.slice(0,5).map(m=>m.name).join(', ')} 외 ${pending.length-5}명</span></div>`;
+      }
+
+      html += `<span class="detail-toggle" onclick="toggleDetail(this)">상세 보기 ▾</span>
+        <div class="rule-detail-panel">
+          <div class="member-section">
+            <div class="member-section-label">완료 (${done.length}명)</div>
+            <div class="member-pills">${done.map(m => {
+              const ds = m.lastDate ? m.lastDate.slice(5).replace('-','/') : '';
+              return `<span class="member-pill done">${m.name} <span class="pill-date">${ds}</span></span>`;
+            }).join('')}</div>
+          </div>
+          ${pending.length > 0 ? `<div class="member-section" style="margin-top:8px;">
+            <div class="member-section-label">미완료 (${pending.length}명)</div>
+            <div class="member-pills">${pending.map(m => `<span class="member-pill pending">${m.name}</span>`).join('')}</div>
+          </div>` : ''}
+        </div>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  document.getElementById('groupContainer').innerHTML = html;
+}
+
+// ─── Interactions ───
+function toggleGroup(idx) {
+  collapsedGroups[idx] = !collapsedGroups[idx];
+  render();
+}
+
+function setGroupPeriod(gi, period) {
+  groupPeriods[gi] = period;
+  render();
+}
+
+function toggleDetail(el) {
+  const panel = el.nextElementSibling;
+  panel.classList.toggle('open');
+  el.textContent = panel.classList.contains('open') ? '접기 ▴' : '상세 보기 ▾';
+}
+
+// ─── Init ───
+render();
+</script>
+</body>
+</html>

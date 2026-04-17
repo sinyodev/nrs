@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NRS – 목표 Working Station</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+      font-size: 14px;
+      color: #343434;
+      background: #f5f5f5;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar (LNB) ── */
+    .sidebar { width: 200px; min-width: 200px; background: #ffffff; display: flex; flex-direction: column; border-right: 1px solid #e5e7eb; overflow-y: auto; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; padding: 14px 16px; font-size: 16px; font-weight: 700; color: #343434; cursor: pointer; }
+    .sidebar-logo img { width: 32px; height: 32px; border-radius: 7px; }
+
+    .point-banner { margin: 8px 12px; padding: 6px 12px; border-radius: 6px; background: linear-gradient(90deg, #20c997 0%, #01c3d5 100%); color: #ffffff; font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+
+    .nav-menu { padding: 8px 0; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; font-size: 14px; font-weight: 500; color: #474747; cursor: pointer; transition: background 0.15s; }
+    .nav-item:hover { background: #f5f5f5; }
+    .nav-item.active { background: #f5f5f5; color: #343434; font-weight: 600; }
+    .nav-icon { width: 18px; height: 18px; color: #848484; flex-shrink: 0; }
+    .nav-arrow { margin-left: auto; width: 14px; height: 14px; color: #aeaeae; }
+
+    .sidebar-footer { border-top: 1px solid #e5e7eb; padding: 12px; }
+    .sidebar-footer-btn { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; border: none; background: #fff; color: #343434; font-size: 13px; cursor: pointer; width: 100%; text-align: left; }
+    .sidebar-footer-btn:hover { background: #f5f5f5; }
+    .beta-badge { background: #f0f9ff; color: #2ca4fb; font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 4px; }
+    .user-info { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; overflow: hidden; }
+    .user-name { font-size: 13px; font-weight: 500; }
+    .user-email { font-size: 11px; color: #848484; }
+
+    /* ── Main Content ── */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #ffffff; }
+
+    .top-bar { height: 48px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 16px; gap: 12px; background: #ffffff; }
+    .top-bar-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #d2d2d2; border-radius: 20px; background: linear-gradient(90deg, #20c997 0%, #01c3d5 100%); color: #ffffff; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .view-toggle { display: flex; gap: 4px; align-items: center; }
+    .view-toggle-btn { display: flex; align-items: center; gap: 4px; padding: 6px 12px 6px 8px; border-radius: 4px; border: none; background: transparent; color: #474747; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .view-toggle-btn.active { background: #343434; color: #ffffff; font-weight: 600; }
+    .search-box { flex: 1; max-width: 300px; padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f5f5f5; font-size: 13px; color: #848484; outline: none; }
+    .top-bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .btn-primary { display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 8px; border-radius: 6px; border: none; background: #343434; color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-secondary { padding: 6px 12px; border-radius: 6px; border: 1px solid #d2d2d2; background: #ffffff; color: #343434; font-size: 13px; cursor: pointer; }
+
+    .table-wrapper { flex: 1; overflow: auto; }
+    .goal-table { width: 100%; border-collapse: collapse; }
+    .table-header-row { background: #eaeaea; border-radius: 6px; position: sticky; top: 0; z-index: 10; }
+    .table-header-row th { padding: 8px 12px; font-size: 12px; font-weight: 500; color: #474747; text-align: left; white-space: nowrap; }
+    .table-header-row th:first-child { min-width: 80px; }
+    .table-header-row th.col-name { min-width: 300px; }
+
+    .goal-row { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
+    .goal-row:hover { background: #f9f9f9; }
+    .goal-row td { padding: 8px 12px; font-size: 13px; vertical-align: middle; }
+
+    .type-badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .badge-objective   { background: #fff0f3; color: #ef2e62; }
+    .badge-key-result  { background: #f2f1fe; color: #6358d5; }
+    .badge-initiative  { background: #e9fafb; color: #00b6c7; }
+
+    .status-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .status-inprogress { background: #f0f9ff; color: #2ca4fb; }
+    .status-complete   { background: #e6fef0; color: #08bf52; }
+
+    .progress-cell { display: flex; align-items: center; gap: 8px; min-width: 80px; }
+    .progress-bar-track { flex: 1; height: 6px; background: #e5e7eb; border-radius: 10px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #3982ef; border-radius: 10px; }
+
+    .register-btn { padding: 3px 8px; border-radius: 4px; border: 1px solid #d2d2d2; background: #fff; color: #474747; font-size: 12px; cursor: pointer; white-space: nowrap; }
+    .register-btn:hover { background: #f5f5f5; }
+
+    .row-indent { padding-left: 24px; }
+    .row-indent-2 { padding-left: 48px; }
+  </style>
+</head>
+<body>
+  <!-- Captured structure — see structure.md for the full component tree. -->
+  <!-- Source: https://hrp.newrrow.com/nrs/working-station/goals -->
+  <!-- This file is a reference snapshot only; the React re-implementation lives in src/pages/Original.tsx -->
+</body>
+</html>

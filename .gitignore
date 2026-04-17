@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-ssr
+*.tsbuildinfo
+.claude/
+Microsoft/
+*.local
+.vite
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log

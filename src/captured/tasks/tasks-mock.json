@@ -1,0 +1,140 @@
+{
+  "_meta": {
+    "source": "https://hrp.newrrow.com/nrs/working-station/tasks",
+    "capturedAt": "2026-04-17",
+    "note": "OKR 트리 + Action 등록 통합: tasks는 Initiative 하위 Task(가설검증 과정), actions는 일일 등록 단위. timeBlocks.actionId는 Action.id 참조."
+  },
+
+  "tasks": [
+    {
+      "id": 5001,
+      "title": "레이스 파이프라인 안정화",
+      "initiativeId": 2401,
+      "memberId": 1000,
+      "startDate": "2026-04-01",
+      "endDate": "2026-06-30",
+      "hypothesis": "자동화 정산이 운영비 절감 > 20%",
+      "progressRate": 40
+    },
+    {
+      "id": 5002,
+      "title": "월간 일잘팀 리포트 정례화",
+      "initiativeId": 2402,
+      "memberId": 1000,
+      "startDate": "2026-02-23",
+      "endDate": "2026-04-30",
+      "hypothesis": "정기 리포트로 확산 속도 +25%",
+      "progressRate": 55
+    },
+    {
+      "id": 5003,
+      "title": "경영위 의사결정 Template",
+      "initiativeId": 2327,
+      "memberId": 1000,
+      "startDate": "2026-03-13",
+      "endDate": "2026-04-30",
+      "hypothesis": "Template화로 회의시간 −30%",
+      "progressRate": 60
+    },
+    {
+      "id": 5004,
+      "title": "inAX OKIT 운영 개선안 수립",
+      "initiativeId": 2329,
+      "memberId": 1000,
+      "startDate": "2026-05-01",
+      "endDate": "2026-06-30",
+      "hypothesis": "OKIT 활용도 2배",
+      "progressRate": 10
+    }
+  ],
+
+  "actions": [
+    {
+      "id": 101,
+      "title": "경영위원회 Template 제작",
+      "taskId": 5003,
+      "status": "TODO",
+      "priority": "MEDIUM",
+      "isKeyTask": false,
+      "dueDate": null,
+      "subtaskCount": 0,
+      "estimatedMinutes": 90
+    },
+
+    {
+      "id": 201,
+      "title": "[레이스 운영 및 정산] 포인트 정산/지급 및 해외 정산",
+      "taskId": 5001,
+      "status": "TODO",
+      "priority": "MEDIUM",
+      "isKeyTask": true,
+      "dueDate": "2026-07-25",
+      "subtaskCount": 0,
+      "estimatedMinutes": 120
+    },
+    {
+      "id": 202,
+      "title": "일잘팀 기획",
+      "taskId": 5001,
+      "status": "TODO",
+      "priority": "MEDIUM",
+      "isKeyTask": false,
+      "dueDate": null,
+      "subtaskCount": 11,
+      "estimatedMinutes": 60
+    },
+    {
+      "id": 203,
+      "title": "[레이스 운영 및 정산] 리더 MA 진단 취합",
+      "taskId": 5001,
+      "status": "IN_PROGRESS",
+      "priority": "MEDIUM",
+      "isKeyTask": true,
+      "dueDate": "2026-04-30",
+      "subtaskCount": 0,
+      "estimatedMinutes": 90
+    },
+    {
+      "id": 204,
+      "title": "[레이스 대시보드] 대시보드 F/E 개발",
+      "taskId": 5001,
+      "status": "DONE",
+      "priority": "HIGH",
+      "isKeyTask": true,
+      "dueDate": "2026-03-02",
+      "subtaskCount": 0,
+      "estimatedMinutes": 240
+    },
+
+    {
+      "id": 301,
+      "title": "[전사 교학상장 콘텐츠 발행] 월간 일잘팀 리포트 제작/발행",
+      "taskId": 5002,
+      "status": "TODO",
+      "priority": "HIGH",
+      "isKeyTask": true,
+      "dueDate": "2026-04-22",
+      "subtaskCount": 2,
+      "estimatedMinutes": 180
+    },
+
+    { "id": 401, "title": "주간 회의록 정리",      "taskId": null, "status": "TODO",        "priority": "MEDIUM", "isKeyTask": false, "dueDate": null,         "subtaskCount": 0, "estimatedMinutes": 30 },
+    { "id": 402, "title": "이메일 회신 정리",      "taskId": null, "status": "DONE",        "priority": "LOW",    "isKeyTask": false, "dueDate": "2026-04-15", "subtaskCount": 0, "estimatedMinutes": 30 },
+    { "id": 403, "title": "NRS UX 개선 아이디어",   "taskId": null, "status": "TODO",        "priority": "MEDIUM", "isKeyTask": false, "dueDate": null,         "subtaskCount": 0, "estimatedMinutes": 60 },
+    { "id": 404, "title": "사내 슬랙 답변",         "taskId": null, "status": "IN_PROGRESS", "priority": "LOW",    "isKeyTask": false, "dueDate": null,         "subtaskCount": 0, "estimatedMinutes": 15 },
+    { "id": 405, "title": "월간 보고서 표지 디자인","taskId": null, "status": "TODO",        "priority": "LOW",    "isKeyTask": false, "dueDate": "2026-04-30", "subtaskCount": 0, "estimatedMinutes": 60 }
+  ],
+
+  "timeBlocks": [
+    { "id": 1, "actionId": 0,   "startAt": "2026-04-17T09:00", "durationMinutes": 60  },
+    { "id": 2, "actionId": 0,   "startAt": "2026-04-17T10:00", "durationMinutes": 270 },
+    { "id": 3, "actionId": 0,   "startAt": "2026-04-17T14:30", "durationMinutes": 60  },
+    { "id": 4, "actionId": 403, "startAt": "2026-04-17T15:30", "durationMinutes": 150 }
+  ],
+
+  "calendarPlaceholders": [
+    { "title": "최종진단 차트 제작", "startAt": "2026-04-17T09:00", "durationMinutes": 60 },
+    { "title": "경영위 템플릿 제작", "startAt": "2026-04-17T10:00", "durationMinutes": 270 },
+    { "title": "포인트 협의",        "startAt": "2026-04-17T14:30", "durationMinutes": 60 }
+  ]
+}
