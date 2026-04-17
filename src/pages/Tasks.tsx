@@ -100,26 +100,61 @@ export default function TasksPage() {
     )
   }
 
+  const deleteGoal = (goalId: number) => {
+    setBoard((prev) => {
+      const goalIds = new Set<number>([goalId])
+      let changed = true
+
+      while (changed) {
+        changed = false
+        for (const goal of prev.goals) {
+          if (goal.parentId !== null && goalIds.has(goal.parentId) && !goalIds.has(goal.id)) {
+            goalIds.add(goal.id)
+            changed = true
+          }
+        }
+      }
+
+      const taskIds = new Set(
+        prev.tasks.filter((task) => goalIds.has(task.initiativeId)).map((task) => task.id),
+      )
+
+      return {
+        goals: prev.goals.filter((goal) => !goalIds.has(goal.id)),
+        tasks: prev.tasks.filter((task) => !taskIds.has(task.id)),
+        actions: prev.actions.filter(
+          (action) => action.taskId === null || !taskIds.has(action.taskId),
+        ),
+      }
+    })
+  }
+
+  const deleteTask = (taskId: number) => {
+    setBoard((prev) => ({
+      ...prev,
+      tasks: prev.tasks.filter((task) => task.id !== taskId),
+      actions: prev.actions.filter((action) => action.taskId !== taskId),
+    }))
+  }
+
+  const deleteAction = (actionId: number) => {
+    updateActions((actions) => actions.filter((action) => action.id !== actionId))
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-surface">
       <Sidebar />
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="shrink-0 border-b border-line px-6 py-4">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-40">
-                OKIT / TODO
-              </div>
-              <h1 className="mt-1 text-2xl font-bold text-ink-100">할일 구조 정리</h1>
-              <p className="mt-1 text-sm text-ink-50">
-                왼쪽은 OKIT, 오른쪽은 TODO입니다. Task를 드래그해서 Action에 연결하세요.
-              </p>
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-40">
+              OKIT / TODO
             </div>
-            <div className="text-right">
-              <div className="text-[11px] uppercase tracking-[0.2em] text-ink-40">layout</div>
-              <div className="text-sm font-semibold text-ink-100">OKIT 40% / TODO 60%</div>
-            </div>
+            <h1 className="mt-1 text-2xl font-bold text-ink-100">할 일</h1>
+            <p className="mt-1 text-sm text-ink-50">
+              Task를 드래그해서 Action에 연결하세요.
+            </p>
           </div>
         </header>
 
@@ -133,6 +168,8 @@ export default function TasksPage() {
               onToggleTaskDone={toggleTaskDone}
               onEditTaskDates={editTaskDates}
               onAddTask={addTask}
+              onDeleteGoal={deleteGoal}
+              onDeleteTask={deleteTask}
             />
           </div>
 
@@ -146,6 +183,7 @@ export default function TasksPage() {
               onAddAction={addAction}
               onEditActionTitle={editActionTitle}
               onLinkTaskToAction={linkTaskToAction}
+              onDeleteAction={deleteAction}
             />
           </div>
         </div>

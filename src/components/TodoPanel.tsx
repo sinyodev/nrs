@@ -42,6 +42,7 @@ interface TodoPanelProps {
   onAddAction: (title: string) => void
   onEditActionTitle: (actionId: number, title: string) => void
   onLinkTaskToAction: (actionId: number, taskId: number) => void
+  onDeleteAction: (actionId: number) => void
 }
 
 export function TodoPanel({
@@ -53,6 +54,7 @@ export function TodoPanel({
   onAddAction,
   onEditActionTitle,
   onLinkTaskToAction,
+  onDeleteAction,
 }: TodoPanelProps) {
   const [draftTitle, setDraftTitle] = useState('')
   const [dropTarget, setDropTarget] = useState<number | null>(null)
@@ -98,14 +100,15 @@ export function TodoPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
-        <div className="grid min-w-[760px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr] border-b border-line py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-40">
+        <div className="grid min-w-[800px] grid-cols-[1.2fr_0.85fr_0.85fr_0.75fr_28px] border-b border-line bg-surface py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-ink-40">
           <div className="px-2">Action</div>
           <div className="px-2">Task</div>
           <div className="px-2">Initiative</div>
           <div className="px-2">KR</div>
+          <div />
         </div>
 
-        <div className="grid min-w-[760px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr] border-b border-line/70 py-2 text-sm">
+        <div className="grid min-w-[800px] grid-cols-[1.2fr_0.85fr_0.85fr_0.75fr_28px] border-b border-dashed border-line/80 py-1.5 text-sm">
           <div className="flex items-center gap-2 px-2">
             <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded bg-emerald-600 px-1.5 text-[10px] font-bold leading-none text-white">
               A
@@ -125,7 +128,7 @@ export function TodoPanel({
             <button
               type="button"
               onClick={submitDraft}
-              className="text-xs text-ink-80 hover:text-brand-600"
+              className="rounded bg-surface-2 px-2 py-1 text-xs text-ink-80 hover:text-brand-600"
             >
               + Action
             </button>
@@ -133,10 +136,11 @@ export function TodoPanel({
           <div className="px-2 text-xs italic text-ink-40">공란</div>
           <div className="px-2 text-xs italic text-ink-40">공란</div>
           <div className="px-2 text-xs italic text-ink-40">공란</div>
+          <div />
         </div>
 
         {rows.length === 0 ? (
-          <div className="min-w-[760px] border-b border-line/60 px-2 py-5 text-sm italic text-ink-40">
+          <div className="min-w-[800px] border-b border-dashed border-line/80 px-2 py-5 text-sm italic text-ink-40">
             선택한 날짜 구간에 액션이 없습니다.
           </div>
         ) : null}
@@ -165,8 +169,8 @@ export function TodoPanel({
                 if (!Number.isNaN(taskId)) onLinkTaskToAction(action.id, taskId)
                 setDropTarget(null)
               }}
-              className={`grid min-h-9 min-w-[760px] grid-cols-[1.2fr_0.9fr_0.9fr_0.8fr] items-center border-b border-line/60 py-1.5 text-sm transition-colors ${
-                isDropTarget ? 'bg-brand-50/50' : 'hover:bg-surface-2/40'
+              className={`group grid min-h-8 min-w-[800px] grid-cols-[1.2fr_0.85fr_0.85fr_0.75fr_28px] items-center border-b border-dashed border-line/80 py-1 text-sm transition-colors ${
+                isDropTarget ? 'bg-brand-50/60' : 'hover:bg-surface-2/50'
               }`}
             >
               <div className="flex min-w-0 items-center gap-2 px-2">
@@ -184,6 +188,20 @@ export function TodoPanel({
               <div className="min-w-0 truncate px-2 text-ink-80">{chain.task}</div>
               <div className="min-w-0 truncate px-2 text-ink-80">{chain.initiative}</div>
               <div className="min-w-0 truncate px-2 text-ink-80">{chain.kr}</div>
+              <button
+                type="button"
+                onClick={() => onDeleteAction(action.id)}
+                className="flex h-6 w-6 items-center justify-center text-ink-40 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                aria-label="삭제"
+                title="삭제"
+              >
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M5.5 2.5h5l.5 1H14v1H2v-1h3l.5-1Zm-.7 3h6.4l-.4 8H5.2l-.4-8Z"
+                  />
+                </svg>
+              </button>
             </div>
           )
         })}

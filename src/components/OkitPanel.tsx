@@ -60,6 +60,8 @@ interface OkitPanelProps {
   onToggleTaskDone: (taskId: number) => void
   onEditTaskDates: (taskId: number, startDate: string, endDate: string) => void
   onAddTask: (initiativeId: number, title: string, startDate: string, endDate: string) => void
+  onDeleteGoal: (goalId: number) => void
+  onDeleteTask: (taskId: number) => void
 }
 
 function TaskCreateForm({
@@ -75,13 +77,13 @@ function TaskCreateForm({
   const [range, setRange] = useState({ startDate: todayIso(), endDate: todayIso() })
 
   return (
-    <div className="ml-[52px] grid max-w-[760px] grid-cols-[minmax(220px,1fr)_220px_auto] items-center gap-2 py-1.5">
+    <div className="ml-[52px] grid max-w-[760px] grid-cols-[minmax(220px,1fr)_220px_auto] items-center gap-2 border-b border-dashed border-line/80 py-1.5">
       <input
         autoFocus
         value={title}
         onChange={(event) => setTitle(event.target.value)}
         placeholder="Task 제목"
-        className="h-8 rounded border border-line bg-surface px-2 text-sm outline-none placeholder:text-ink-40"
+        className="h-7 rounded border border-line bg-surface px-2 text-sm outline-none placeholder:text-ink-40"
       />
       <DateRangePicker value={range} onCommit={setRange} />
       <div className="flex items-center gap-2">
@@ -117,6 +119,8 @@ export function OkitPanel({
   onToggleTaskDone,
   onEditTaskDates,
   onAddTask,
+  onDeleteGoal,
+  onDeleteTask,
 }: OkitPanelProps) {
   const tree = useMemo(() => buildGoalTree(goals), [goals])
   const [expanded, setExpanded] = useState<Record<number, boolean>>(() => {
@@ -142,7 +146,7 @@ export function OkitPanel({
 
     return (
       <div key={goal.id} className={depth > 0 ? 'ml-5 border-l border-line/70 pl-4' : ''}>
-        <div className="flex min-h-8 items-center gap-2 text-sm">
+        <div className="group flex min-h-8 items-center gap-2 border-b border-dashed border-line/80 pr-1 text-sm hover:bg-surface-2/50">
           <button
             type="button"
             onClick={() => toggle(goal.id)}
@@ -155,7 +159,7 @@ export function OkitPanel({
           <EditableText
             value={goal.title}
             onCommit={(title) => onEditGoalTitle(goal.id, title)}
-            className={`min-w-0 bg-transparent text-left outline-none ${
+            className={`min-w-0 flex-1 bg-transparent text-left outline-none ${
               goal.okitType === 'OBJECTIVE'
                 ? 'text-[15px] font-bold text-ink-100'
                 : goal.okitType === 'KEY_RESULT'
@@ -164,6 +168,20 @@ export function OkitPanel({
             }`}
             placeholder="제목 없음"
           />
+          <button
+            type="button"
+            onClick={() => onDeleteGoal(goal.id)}
+            className="flex h-6 w-6 items-center justify-center opacity-0 transition-opacity text-ink-40 hover:text-red-500 group-hover:opacity-100"
+            aria-label="삭제"
+            title="삭제"
+          >
+            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M5.5 2.5h5l.5 1H14v1H2v-1h3l.5-1Zm-.7 3h6.4l-.4 8H5.2l-.4-8Z"
+              />
+            </svg>
+          </button>
         </div>
 
         {isOpen ? (
@@ -171,7 +189,9 @@ export function OkitPanel({
             {isInitiative ? (
               <div className="ml-5 border-l border-line/70 pl-4">
                 {relatedTasks.length === 0 ? (
-                  <div className="py-1 pl-5 text-xs italic text-ink-40">연결된 Task가 없습니다.</div>
+                  <div className="border-b border-dashed border-line/80 py-1 pl-5 text-xs italic text-ink-40">
+                    연결된 Task가 없습니다.
+                  </div>
                 ) : (
                   relatedTasks.map((task) => (
                     <div
@@ -182,7 +202,7 @@ export function OkitPanel({
                         event.dataTransfer.setData('application/x-nrs-task-id', String(task.id))
                         event.dataTransfer.setData('text/nrs-task-id', String(task.id))
                       }}
-                      className="grid min-h-8 grid-cols-[20px_18px_18px_minmax(0,1fr)_190px] items-center gap-2 text-sm hover:bg-surface-2/40"
+                      className="group grid min-h-8 grid-cols-[20px_18px_18px_minmax(0,1fr)_190px_24px] items-center gap-2 border-b border-dashed border-line/80 pr-1 text-sm hover:bg-surface-2/50"
                     >
                       <span className="text-center text-xs text-ink-50">-</span>
                       <Chip label="T" className="bg-slate-500 text-white" />
@@ -207,6 +227,20 @@ export function OkitPanel({
                           onEditTaskDates(task.id, next.startDate, next.endDate)
                         }
                       />
+                      <button
+                        type="button"
+                        onClick={() => onDeleteTask(task.id)}
+                        className="flex h-6 w-6 items-center justify-center opacity-0 transition-opacity text-ink-40 hover:text-red-500 group-hover:opacity-100"
+                        aria-label="삭제"
+                        title="삭제"
+                      >
+                        <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
+                          <path
+                            fill="currentColor"
+                            d="M5.5 2.5h5l.5 1H14v1H2v-1h3l.5-1Zm-.7 3h6.4l-.4 8H5.2l-.4-8Z"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   ))
                 )}
@@ -214,7 +248,7 @@ export function OkitPanel({
                 <button
                   type="button"
                   onClick={() => setCreatingTaskFor(goal.id)}
-                  className="py-1 pl-[40px] text-xs text-ink-80 hover:text-brand-600"
+                  className="border-b border-dashed border-line/80 py-1 pl-[40px] text-xs text-ink-80 hover:text-brand-600"
                 >
                   + Task
                 </button>
@@ -236,5 +270,5 @@ export function OkitPanel({
     )
   }
 
-  return <div className="py-2">{tree.map((goal) => renderGoal(goal))}</div>
+  return <div className="py-1">{tree.map((goal) => renderGoal(goal))}</div>
 }
