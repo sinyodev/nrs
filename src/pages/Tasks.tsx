@@ -1,341 +1,155 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { LinkGoalMenu } from '../components/LinkGoalMenu'
-import { OkrTree } from '../components/OkrTree'
+import { useEffect, useRef, useState } from 'react'
 import { Sidebar } from '../components/Sidebar'
-import { TaskDetailPanel } from '../components/TaskDetailPanel'
-import { UndoToast } from '../components/UndoToast'
-import { WeeklyCalendar, type CalEvent } from '../components/WeeklyCalendar'
-import { calcLinkRate } from '../data/chain'
-import {
-  mockActions,
-  mockCalendarPlaceholders,
-  mockGoals,
-  mockTasks,
-  mockTimeBlocks,
-} from '../data/mock'
-import type { Action, Task } from '../data/types'
+import { OkitPanel } from '../components/OkitPanel'
+import { TodoPanel } from '../components/TodoPanel'
+import { loadBoardState, saveBoardState } from '../data/board'
+import type { Action, BoardState, Goal, Task } from '../data/types'
 
-const TODAY = '2026-04-17'
+function todayIso() {
+  const date = new Date()
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().slice(0, 10)
+}
 
-function initialEvents(): CalEvent[] {
-  const placeholders: CalEvent[] = mockCalendarPlaceholders.map((p, i) => ({
-    id: `pl-${i}`,
-    title: p.title,
-    startAt: p.startAt,
-    durationMinutes: p.durationMinutes,
-  }))
-  const actionsById = new Map(mockActions.map((a) => [a.id, a]))
-  const fromBlocks: CalEvent[] = mockTimeBlocks
-    .filter((b) => actionsById.has(b.actionId))
-    .map((b) => {
-      const action = actionsById.get(b.actionId)!
-      return {
-        id: `tb-${b.id}`,
-        title: action.title,
-        startAt: b.startAt,
-        durationMinutes: b.durationMinutes,
-        action,
-      }
-    })
-  return [...placeholders, ...fromBlocks]
+function maxId<T extends { id: number }>(items: T[]) {
+  return items.reduce((max, item) => Math.max(max, item.id), 0)
 }
 
 export default function TasksPage() {
-  const [actions, setActions] = useState<Action[]>(mockActions)
-  const [tasks] = useState<Task[]>(mockTasks)
-  const [events, setEvents] = useState<CalEvent[]>(initialEvents)
-  const [activeDay, setActiveDay] = useState<string>(TODAY)
-  const [selectedActionId, setSelectedActionId] = useState<number | null>(null)
-  const [highlightActionId, setHighlightActionId] = useState<number | null>(null)
-  const [hoveredActionId, setHoveredActionId] = useState<number | null>(null)
-  const [linkingAction, setLinkingAction] = useState<{
-    actionId: number
-    anchor: { top: number; left: number }
-  } | null>(null)
+  const [board, setBoard] = useState<BoardState>(() => loadBoardState())
+  const [activeDay, setActiveDay] = useState(todayIso())
 
-  const [undoAction, setUndoAction] = useState<{
-    message: string
-    revert: () => void
-  } | null>(null)
-
-  const eventIdCounter = useRef(1000)
-  const actionIdCounter = useRef(10_000)
-
-  const actionsById = useMemo(() => new Map(actions.map((a) => [a.id, a])), [actions])
-  const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks])
-  const goalsById = useMemo(() => new Map(mockGoals.map((g) => [g.id, g])), [])
-
-  const selectedAction =
-    selectedActionId !== null ? actionsById.get(selectedActionId) ?? null : null
-  const parentTask =
-    selectedAction?.taskId != null ? tasksById.get(selectedAction.taskId) ?? null : null
-  const parentInitiative =
-    parentTask ? goalsById.get(parentTask.initiativeId) ?? null : null
-
-  const linkRate = useMemo(() => calcLinkRate(actions), [actions])
+  const nextTaskId = useRef(maxId(board.tasks) + 1)
+  const nextActionId = useRef(maxId(board.actions) + 1)
 
   useEffect(() => {
-    setEvents((prev) =>
-      prev.map((e) => {
-        if (!e.action) return e
-        const live = actionsById.get(e.action.id)
-        if (!live) return e
-        return { ...e, action: live, title: live.title }
-      }),
-    )
-  }, [actionsById])
+    saveBoardState(board)
+  }, [board])
 
-  const toggleComplete = useCallback((action: Action) => {
-    const prevStatus = action.status
-    const nextStatus: Action['status'] = prevStatus === 'DONE' ? 'TODO' : 'DONE'
-    setActions((prev) =>
-      prev.map((a) => (a.id === action.id ? { ...a, status: nextStatus } : a)),
-    )
-    setUndoAction({
-      message:
-        nextStatus === 'DONE' ? `"${action.title}" 완료 처리됨` : `"${action.title}" 다시 대기`,
-      revert: () => {
-        setActions((prev) =>
-          prev.map((a) => (a.id === action.id ? { ...a, status: prevStatus } : a)),
-        )
-        setUndoAction(null)
-      },
-    })
-  }, [])
-
-  const openPanelForEvent = useCallback((ev: CalEvent) => {
-    if (!ev.action) return
-    setSelectedActionId(ev.action.id)
-  }, [])
-
-  const changeStatus = (status: Action['status']) => {
-    if (!selectedAction) return
-    setActions((prev) => prev.map((a) => (a.id === selectedAction.id ? { ...a, status } : a)))
+  const updateGoals = (updater: (goals: Goal[]) => Goal[]) => {
+    setBoard((prev) => ({ ...prev, goals: updater(prev.goals) }))
   }
-  const changePriority = (priority: Action['priority']) => {
-    if (!selectedAction) return
-    setActions((prev) => prev.map((a) => (a.id === selectedAction.id ? { ...a, priority } : a)))
+
+  const updateTasks = (updater: (tasks: Task[]) => Task[]) => {
+    setBoard((prev) => ({ ...prev, tasks: updater(prev.tasks) }))
   }
-  const toggleKeyTask = () => {
-    if (!selectedAction) return
-    setActions((prev) =>
-      prev.map((a) => (a.id === selectedAction.id ? { ...a, isKeyTask: !a.isKeyTask } : a)),
+
+  const updateActions = (updater: (actions: Action[]) => Action[]) => {
+    setBoard((prev) => ({ ...prev, actions: updater(prev.actions) }))
+  }
+
+  const editGoalTitle = (goalId: number, title: string) => {
+    updateGoals((goals) => goals.map((goal) => (goal.id === goalId ? { ...goal, title } : goal)))
+  }
+
+  const editTaskTitle = (taskId: number, title: string) => {
+    updateTasks((tasks) => tasks.map((task) => (task.id === taskId ? { ...task, title } : task)))
+  }
+
+  const toggleTaskDone = (taskId: number) => {
+    updateTasks((tasks) =>
+      tasks.map((task) => (task.id === taskId ? { ...task, isDone: !task.isDone } : task)),
     )
   }
 
-  const moveEvent = (id: string, newStartAt: string) => {
-    setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, startAt: newStartAt } : e)))
-  }
-  const resizeEvent = (id: string, newDur: number) => {
-    setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, durationMinutes: newDur } : e)))
+  const editTaskDates = (taskId: number, startDate: string, endDate: string) => {
+    updateTasks((tasks) =>
+      tasks.map((task) => (task.id === taskId ? { ...task, startDate, endDate } : task)),
+    )
   }
 
-  const createAtSlot = (startAt: string, durationMinutes: number, title: string) => {
-    const id = actionIdCounter.current++
-    const newAction: Action = {
-      id,
+  const addTask = (initiativeId: number, title: string, startDate: string, endDate: string) => {
+    const nextTask = {
+      id: nextTaskId.current++,
+      title,
+      initiativeId,
+      memberId: 1000,
+      isDone: false,
+      startDate,
+      endDate,
+      hypothesis: '',
+      progressRate: 0,
+    }
+    updateTasks((tasks) => [nextTask, ...tasks])
+  }
+
+  const addAction = (title: string) => {
+    const nextAction = {
+      id: nextActionId.current++,
       title,
       taskId: null,
-      status: 'TODO',
-      priority: 'MEDIUM',
-      isKeyTask: false,
-      dueDate: null,
-      subtaskCount: 0,
-      estimatedMinutes: durationMinutes,
-    }
-    setActions((prev) => [newAction, ...prev])
-    const evId = `new-${eventIdCounter.current++}`
-    setEvents((prev) => [
-      ...prev,
-      { id: evId, title, startAt, durationMinutes, action: newAction },
-    ])
-    setHighlightActionId(id)
-    setTimeout(() => setHighlightActionId(null), 1800)
-  }
-
-  const dropActionOnCalendar = (actionId: number, startAt: string) => {
-    const action = actionsById.get(actionId)
-    if (!action) return
-    const evId = `drop-${eventIdCounter.current++}`
-    setEvents((prev) => [
-      ...prev,
-      {
-        id: evId,
-        title: action.title,
-        startAt,
-        durationMinutes: action.estimatedMinutes,
-        action,
-      },
-    ])
-    setHighlightActionId(actionId)
-    setTimeout(() => setHighlightActionId(null), 1800)
-  }
-
-  const dropCalendarEventToTask = (calendarEventId: string, taskId: number) => {
-    const event = events.find((item) => item.id === calendarEventId)
-    if (!event) return
-
-    if (event.action) {
-      const actionId = event.action.id
-      setActions((prev) => prev.map((a) => (a.id === actionId ? { ...a, taskId } : a)))
-      setHighlightActionId(actionId)
-    } else {
-      const id = actionIdCounter.current++
-      const newAction: Action = {
-        id,
-        title: event.title,
-        taskId,
-        status: 'TODO',
-        priority: 'MEDIUM',
-        isKeyTask: false,
-        dueDate: null,
-        subtaskCount: 0,
-        estimatedMinutes: event.durationMinutes,
-      }
-      setActions((prev) => [newAction, ...prev])
-      setEvents((prev) =>
-        prev.map((item) => (item.id === calendarEventId ? { ...item, action: newAction } : item)),
-      )
-      setHighlightActionId(id)
-    }
-
-    setTimeout(() => setHighlightActionId(null), 1800)
-  }
-
-  const addAction = (taskId: number | null, title: string) => {
-    const id = actionIdCounter.current++
-    const newAction: Action = {
-      id,
-      title,
-      taskId,
-      status: 'TODO',
-      priority: 'MEDIUM',
+      scheduledDay: activeDay,
+      status: 'TODO' as const,
+      priority: 'MEDIUM' as const,
       isKeyTask: false,
       dueDate: null,
       subtaskCount: 0,
       estimatedMinutes: 30,
     }
-    setActions((prev) => [...prev, newAction])
-    setHighlightActionId(id)
-    setTimeout(() => setHighlightActionId(null), 1800)
+    updateActions((actions) => [nextAction, ...actions])
   }
 
-  const linkActionToTask = (actionId: number, task: Task) => {
-    setActions((prev) => prev.map((a) => (a.id === actionId ? { ...a, taskId: task.id } : a)))
-    setLinkingAction(null)
-    setHighlightActionId(actionId)
-    setTimeout(() => setHighlightActionId(null), 1800)
+  const editActionTitle = (actionId: number, title: string) => {
+    updateActions((actions) =>
+      actions.map((action) => (action.id === actionId ? { ...action, title } : action)),
+    )
   }
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedActionId(null)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  const linkTaskToAction = (actionId: number, taskId: number) => {
+    updateActions((actions) =>
+      actions.map((action) => (action.id === actionId ? { ...action, taskId } : action)),
+    )
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface">
       <Sidebar />
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center justify-between px-6 py-3 border-b border-line shrink-0 gap-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-ink-100">할 일</h1>
-            <div className="text-[11px] text-ink-60 leading-tight">
-              Objective › KR › Initiative › Task › Action
-              <br />
-              <span className="text-ink-40">일일 업무(Action)를 목표에 연결해 성과로 이어지게 하세요</span>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="shrink-0 border-b border-line px-6 py-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-40">
+                OKIT / TODO
+              </div>
+              <h1 className="mt-1 text-2xl font-bold text-ink-100">할일 구조 재정리</h1>
+              <p className="mt-1 text-sm text-ink-50">
+                왼쪽은 OKIT, 오른쪽은 TODO입니다. Task를 끌어다가 Action에 연결하세요.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-line bg-surface-2 px-4 py-3 text-right">
+              <div className="text-[11px] text-ink-50">레이아웃</div>
+              <div className="text-sm font-semibold text-ink-100">OKIT 40% / TODO 60%</div>
             </div>
           </div>
-
-          {/* 성과 연결률 배너 */}
-          <div className="flex items-center gap-3 flex-1 max-w-md">
-            <div className="flex-1">
-              <div className="flex items-center justify-between text-[11px] mb-1">
-                <span className="text-ink-80 font-semibold">성과 연결률</span>
-                <span className="text-ink-60 tabular-nums">
-                  <span className="text-ink-100 font-bold">{linkRate.linked}</span>
-                  <span className="text-ink-40"> / {linkRate.total} 액션</span>
-                  {linkRate.unlinked > 0 && (
-                    <span className="text-warn-text font-semibold ml-2">
-                      미연결 {linkRate.unlinked}
-                    </span>
-                  )}
-                </span>
-              </div>
-              <div className="h-2 bg-surface-4 rounded-full overflow-hidden relative">
-                <div
-                  className="absolute inset-y-0 left-0 bg-brand-500 rounded-full transition-all"
-                  style={{ width: `${linkRate.rate}%` }}
-                />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-brand-500 tabular-nums">
-              {linkRate.rate}%
-            </div>
-          </div>
-
-          <button className="px-3 py-1.5 border border-line rounded-md text-sm bg-surface hover:bg-surface-3 shrink-0">
-            ☰ 완료 목표, 업무
-          </button>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <OkrTree
-            tasks={tasks}
-            actions={actions}
-            hoveredActionId={hoveredActionId}
-            onActionToggleComplete={toggleComplete}
-            onActionSelect={(a) => setSelectedActionId(a.id)}
-            onActionHover={(a) => setHoveredActionId(a?.id ?? null)}
-            onActionDragStart={() => {}}
-            onAddAction={addAction}
-            onLinkAction={(actionId, anchor) => setLinkingAction({ actionId, anchor })}
-            onCalendarDropToTask={dropCalendarEventToTask}
-          />
+        <div className="flex min-h-0 flex-1 gap-4 overflow-hidden p-4">
+          <div className="min-w-0 basis-[40%]">
+            <OkitPanel
+              goals={board.goals}
+              tasks={board.tasks}
+              onEditGoalTitle={editGoalTitle}
+              onEditTaskTitle={editTaskTitle}
+              onToggleTaskDone={toggleTaskDone}
+              onEditTaskDates={editTaskDates}
+              onAddTask={addTask}
+            />
+          </div>
+
+          <div className="min-w-0 basis-[60%]">
+            <TodoPanel
+              activeDay={activeDay}
+              actions={board.actions}
+              tasks={board.tasks}
+              goals={board.goals}
+              onChangeDay={setActiveDay}
+              onAddAction={addAction}
+              onEditActionTitle={editActionTitle}
+              onLinkTaskToAction={linkTaskToAction}
+            />
+          </div>
         </div>
       </main>
-
-      <WeeklyCalendar
-        activeDay={activeDay}
-        onChangeActiveDay={setActiveDay}
-        events={events}
-        onMove={moveEvent}
-        onResize={resizeEvent}
-        onCreateAtSlot={createAtSlot}
-        onSelect={openPanelForEvent}
-        onDropActionId={dropActionOnCalendar}
-        highlightActionId={hoveredActionId ?? highlightActionId}
-        onHoverAction={(a) => setHoveredActionId(a?.id ?? null)}
-      />
-
-      <TaskDetailPanel
-        action={selectedAction}
-        parentTask={parentTask}
-        parentInitiative={parentInitiative}
-        onClose={() => setSelectedActionId(null)}
-        onChangeStatus={changeStatus}
-        onChangePriority={changePriority}
-        onToggleKeyTask={toggleKeyTask}
-      />
-
-      {linkingAction && (
-        <LinkGoalMenu
-          anchor={linkingAction.anchor}
-          onClose={() => setLinkingAction(null)}
-          onLink={(task) => linkActionToTask(linkingAction.actionId, task)}
-        />
-      )}
-
-      {undoAction && (
-        <UndoToast
-          message={undoAction.message}
-          onUndo={undoAction.revert}
-          onDismiss={() => setUndoAction(null)}
-        />
-      )}
     </div>
   )
 }
