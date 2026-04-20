@@ -14,9 +14,7 @@ function toIso(date: Date) {
 }
 
 function addMonths(date: Date, months: number) {
-  const next = new Date(date)
-  next.setMonth(next.getMonth() + months)
-  return next
+  return new Date(date.getFullYear(), date.getMonth() + months, 1)
 }
 
 function buildMonthCells(month: Date) {
@@ -30,6 +28,15 @@ function buildMonthCells(month: Date) {
   }
   while (cells.length % 7 !== 0) cells.push(null)
   return cells
+}
+
+function shortDate(iso: string) {
+  if (!iso) return ''
+  const date = toDate(iso)
+  const yy = String(date.getFullYear()).slice(2)
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${yy}.${mm}.${dd}`
 }
 
 function MonthGrid({
@@ -47,10 +54,10 @@ function MonthGrid({
 
   return (
     <div>
-      <div className="mb-2 text-sm font-semibold text-ink-100">
+      <div className="mb-2 text-[13px] font-bold text-ink-100">
         {month.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' })}
       </div>
-      <div className="grid grid-cols-7 gap-1 text-[10px] text-ink-40">
+      <div className="grid grid-cols-7 gap-1 text-[10px] font-semibold text-ink-40">
         {['일', '월', '화', '수', '목', '금', '토'].map((day) => (
           <div key={day} className="text-center">
             {day}
@@ -74,10 +81,12 @@ function MonthGrid({
               key={iso}
               type="button"
               onClick={() => onPick(iso)}
-              className={`h-7 rounded text-[11px] transition-colors ${
-                active || inRange
-                  ? 'bg-brand-500 text-white'
-                  : 'text-ink-80 hover:bg-surface-2'
+              className={`h-7 rounded text-[11px] font-semibold transition-colors ${
+                active
+                  ? 'bg-ink-100 text-white'
+                  : inRange
+                    ? 'bg-brand-50 text-brand-500'
+                    : 'text-ink-80 hover:bg-surface-2'
               }`}
             >
               {cell.getDate()}
@@ -89,19 +98,35 @@ function MonthGrid({
   )
 }
 
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 text-ink-40" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M4 1.5h1v2h6v-2h1v2h1.5v10h-11v-10H4v-2Zm-0.5 5v6h9v-6h-9Z"
+      />
+    </svg>
+  )
+}
+
 export function DateRangePicker({ value, onCommit }: DateRangePickerProps) {
   const [open, setOpen] = useState(false)
   const [draftStart, setDraftStart] = useState<string | null>(value.startDate || null)
   const [draftEnd, setDraftEnd] = useState<string | null>(value.endDate || null)
+  const [viewMonth, setViewMonth] = useState(() =>
+    value.startDate ? toDate(value.startDate) : new Date(),
+  )
 
-  const base = value.startDate ? toDate(value.startDate) : new Date()
-  const nextMonth = addMonths(base, 1)
+  const nextMonth = addMonths(viewMonth, 1)
   const display =
-    value.startDate && value.endDate ? `${value.startDate} ~ ${value.endDate}` : '날짜 지정'
+    value.startDate && value.endDate
+      ? `${shortDate(value.startDate)} ~ ${shortDate(value.endDate)}`
+      : '날짜 지정'
 
   const resetDraft = () => {
     setDraftStart(value.startDate || null)
     setDraftEnd(value.endDate || null)
+    setViewMonth(value.startDate ? toDate(value.startDate) : new Date())
   }
 
   const pick = (iso: string) => {
@@ -132,41 +157,58 @@ export function DateRangePicker({ value, onCommit }: DateRangePickerProps) {
           setOpen((prev) => !prev)
           resetDraft()
         }}
-        className="h-7 w-full rounded border border-line bg-surface px-2 text-left text-xs text-ink-60 hover:bg-surface-2"
+        className="inline-flex h-7 w-full items-center gap-1.5 rounded bg-surface-2 px-2 text-left text-[12px] font-semibold text-ink-60 ring-1 ring-inset ring-line transition-colors hover:bg-surface-3 hover:text-ink-100"
       >
-        {display}
+        <CalendarIcon />
+        <span className="min-w-0 truncate">{display}</span>
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+6px)] z-30 w-[560px] rounded border border-line bg-surface p-4 shadow-xl">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="text-sm font-semibold text-ink-100">시작 / 종료 날짜</div>
+        <div className="absolute right-0 top-[calc(100%+6px)] z-30 w-[560px] rounded-md border border-line bg-surface p-4 shadow-xl">
+          <div className="mb-3 flex items-center justify-between border-b border-line pb-3">
             <button
               type="button"
-              onClick={() => setOpen(false)}
-              className="text-xs text-ink-50 hover:text-ink-100"
+              onClick={() => setViewMonth((prev) => addMonths(prev, -1))}
+              className="inline-flex h-7 items-center rounded bg-surface-2 px-2 text-xs font-semibold text-ink-60 hover:bg-surface-3 hover:text-ink-100"
             >
-              닫기
+              이전
+            </button>
+            <div className="text-[13px] font-bold text-ink-100">시작 / 종료 날짜</div>
+            <button
+              type="button"
+              onClick={() => setViewMonth((prev) => addMonths(prev, 1))}
+              className="inline-flex h-7 items-center rounded bg-surface-2 px-2 text-xs font-semibold text-ink-60 hover:bg-surface-3 hover:text-ink-100"
+            >
+              다음
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
-            <MonthGrid month={base} startDate={draftStart} endDate={draftEnd} onPick={pick} />
+            <MonthGrid month={viewMonth} startDate={draftStart} endDate={draftEnd} onPick={pick} />
             <MonthGrid month={nextMonth} startDate={draftStart} endDate={draftEnd} onPick={pick} />
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setDraftStart(null)
-              setDraftEnd(null)
-              onCommit({ startDate: '', endDate: '' })
-              setOpen(false)
-            }}
-            className="mt-3 text-xs text-ink-50 hover:text-ink-100"
-          >
-            초기화
-          </button>
+          <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setDraftStart(null)
+                setDraftEnd(null)
+                onCommit({ startDate: '', endDate: '' })
+                setOpen(false)
+              }}
+              className="text-xs font-semibold text-ink-50 hover:text-ink-100"
+            >
+              초기화
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-xs font-semibold text-ink-50 hover:text-ink-100"
+            >
+              닫기
+            </button>
+          </div>
         </div>
       ) : null}
     </div>

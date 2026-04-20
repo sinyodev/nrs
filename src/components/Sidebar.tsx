@@ -23,15 +23,15 @@ const ROUTE_MAP: Record<string, string> = {
 
 export function Sidebar() {
   return (
-    <aside className="w-[var(--layout-sidebar-w)] shrink-0 bg-surface border-r border-line flex flex-col overflow-y-auto">
+    <aside className="relative z-10 flex w-[var(--layout-sidebar-w)] shrink-0 flex-col overflow-y-auto border-r border-line bg-surface shadow-[8px_0_30px_rgba(15,23,42,0.04)]">
       {/* 로고 */}
-      <div className="flex items-center gap-2 px-4 py-3.5 cursor-pointer">
+      <div className="flex cursor-pointer items-center gap-2 px-4 py-4">
         <div className="w-8 h-8 rounded-md bg-brand-gradient flex items-center justify-center text-surface font-extrabold text-[13px]">
           N
         </div>
         <span className="text-md font-bold text-ink-100">NRS</span>
         <button
-          className="ml-auto w-7 h-7 rounded-full hover:bg-surface-3 flex items-center justify-center text-ink-60 text-base"
+          className="ml-auto flex h-7 w-7 items-center justify-center rounded-full text-base text-ink-60 hover:bg-surface-3"
           aria-label="알림"
         >
           🔔
@@ -39,13 +39,13 @@ export function Sidebar() {
       </div>
 
       {/* 포인트 배너 */}
-      <button className="mx-3 mb-2 px-3 py-1.5 rounded-md bg-brand-gradient text-surface text-xs font-semibold flex items-center justify-between">
+      <button className="mx-3 mb-3 flex items-center justify-between rounded-lg bg-brand-gradient px-3 py-2 text-xs font-semibold text-surface shadow-[0_10px_22px_rgba(1,195,213,0.16)]">
         <span>NRS 포인트</span>
         <strong>{mockPoint.total}P</strong>
       </button>
 
       {/* 메뉴 */}
-      <nav className="py-2 flex-1">
+      <nav className="flex-1 space-y-1 px-2 py-2">
         {mockMenus.map((m) => {
           const route = ROUTE_MAP[m.id]
           const inner = (
@@ -56,7 +56,7 @@ export function Sidebar() {
             </>
           )
           const baseCls =
-            'flex items-center gap-2.5 px-4 py-2.5 text-base font-medium cursor-pointer transition-colors'
+            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-base font-medium cursor-pointer transition-colors'
           if (route) {
             return (
               <NavLink
@@ -66,7 +66,7 @@ export function Sidebar() {
                 className={({ isActive }) =>
                   `${baseCls} ${
                     isActive
-                      ? 'bg-surface-3 text-ink-100 font-semibold'
+                      ? 'bg-surface-3 text-ink-100 font-semibold shadow-[inset_3px_0_0_var(--color-brand-500)]'
                       : 'text-ink-80 hover:bg-surface-3'
                   }`
                 }
@@ -84,7 +84,7 @@ export function Sidebar() {
       </nav>
 
       {/* 푸터 */}
-      <div className="border-t border-line p-3 space-y-1">
+      <div className="space-y-1 border-t border-line bg-surface-2/60 p-3">
         <button className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-sm text-ink-100 hover:bg-surface-3">
           <span>✨</span>
           <span className="flex-1 text-left">NRS 에이전트</span>

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Sidebar } from '../components/Sidebar'
+import type { MouseEvent as ReactMouseEvent } from 'react'
 import { OkitPanel } from '../components/OkitPanel'
+import { Sidebar } from '../components/Sidebar'
 import { TodoPanel } from '../components/TodoPanel'
 import { loadBoardState, saveBoardState } from '../data/board'
-import type { Action, BoardState, Goal, Task } from '../data/types'
+import type { Action, BoardState, Goal, Task, TaskWorkStatus } from '../data/types'
 
 function todayIso() {
   const date = new Date()
@@ -17,6 +18,8 @@ function maxId<T extends { id: number }>(items: T[]) {
 export default function TasksPage() {
   const [board, setBoard] = useState<BoardState>(() => loadBoardState())
   const [activeDay, setActiveDay] = useState(todayIso())
+  const [okitWidth, setOkitWidth] = useState(40)
+  const boardAreaRef = useRef<HTMLDivElement | null>(null)
 
   const nextTaskId = useRef(maxId(board.tasks) + 1)
   const nextActionId = useRef(maxId(board.actions) + 1)
@@ -45,9 +48,11 @@ export default function TasksPage() {
     updateTasks((tasks) => tasks.map((task) => (task.id === taskId ? { ...task, title } : task)))
   }
 
-  const toggleTaskDone = (taskId: number) => {
+  const setTaskWorkStatus = (taskId: number, workStatus: TaskWorkStatus) => {
     updateTasks((tasks) =>
-      tasks.map((task) => (task.id === taskId ? { ...task, isDone: !task.isDone } : task)),
+      tasks.map((task) =>
+        task.id === taskId ? { ...task, workStatus, isDone: workStatus === 'DONE' } : task,
+      ),
     )
   }
 
@@ -63,7 +68,12 @@ export default function TasksPage() {
       title,
       initiativeId,
       memberId: 1000,
+      assignees: [
+        { memberId: 1000, name: '이재원' },
+        { memberId: 1001, name: '심재현' },
+      ],
       isDone: false,
+      workStatus: 'NOT_STARTED' as const,
       startDate,
       endDate,
       hypothesis: '',
@@ -141,12 +151,35 @@ export default function TasksPage() {
     updateActions((actions) => actions.filter((action) => action.id !== actionId))
   }
 
+  const startPanelResize = (event: ReactMouseEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const rect = boardAreaRef.current?.getBoundingClientRect()
+    if (!rect) return
+
+    const move = (moveEvent: MouseEvent) => {
+      const next = ((moveEvent.clientX - rect.left) / rect.width) * 100
+      setOkitWidth(Math.min(70, Math.max(25, next)))
+    }
+
+    const stop = () => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseup', stop)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', stop)
+  }
+
   return (
-    <div className="flex h-screen overflow-hidden bg-surface">
+    <div className="flex h-screen overflow-hidden bg-surface-3">
       <Sidebar />
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="shrink-0 border-b border-line px-6 py-4">
+        <header className="shrink-0 border-b border-line bg-surface/95 px-6 py-4 shadow-[0_8px_26px_rgba(15,23,42,0.04)]">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.24em] text-ink-40">
               OKIT / TODO
@@ -158,22 +191,43 @@ export default function TasksPage() {
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 gap-3 overflow-hidden p-3">
-          <div className="min-w-0 basis-[40%]">
-            <OkitPanel
-              goals={board.goals}
-              tasks={board.tasks}
-              onEditGoalTitle={editGoalTitle}
-              onEditTaskTitle={editTaskTitle}
-              onToggleTaskDone={toggleTaskDone}
-              onEditTaskDates={editTaskDates}
-              onAddTask={addTask}
-              onDeleteGoal={deleteGoal}
-              onDeleteTask={deleteTask}
-            />
+        <div ref={boardAreaRef} className="flex min-h-0 flex-1 overflow-hidden p-4">
+          <div
+            className="min-w-0 overflow-hidden rounded-xl border border-line bg-surface shadow-[0_18px_45px_rgba(15,23,42,0.06)]"
+            style={{ width: `${okitWidth}%` }}
+          >
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="shrink-0 border-b border-line bg-surface-2/80 px-4 py-3">
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-ink-40">
+                  OKIT
+                </div>
+                <div className="mt-1 text-lg font-semibold text-ink-100">목표 구조</div>
+              </div>
+              <div className="min-h-0 flex-1 overflow-auto px-3 py-2">
+                <OkitPanel
+                  goals={board.goals}
+                  tasks={board.tasks}
+                  onEditGoalTitle={editGoalTitle}
+                  onEditTaskTitle={editTaskTitle}
+                  onSetTaskWorkStatus={setTaskWorkStatus}
+                  onEditTaskDates={editTaskDates}
+                  onAddTask={addTask}
+                  onDeleteGoal={deleteGoal}
+                  onDeleteTask={deleteTask}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="min-w-0 basis-[60%]">
+          <div
+            onMouseDown={startPanelResize}
+            className="group flex w-5 shrink-0 cursor-col-resize items-center justify-center"
+            title="패널 너비 조절"
+          >
+            <div className="h-14 w-1 rounded-full bg-line-mid/70 transition-all group-hover:h-20 group-hover:bg-brand-500" />
+          </div>
+
+          <div className="min-w-0 flex-1 overflow-hidden">
             <TodoPanel
               activeDay={activeDay}
               actions={board.actions}

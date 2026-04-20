@@ -10,6 +10,12 @@ export interface Member {
   disable: boolean
 }
 
+export interface Assignee {
+  memberId: number
+  name: string
+  profileImagePath?: string | null
+}
+
 export interface Goal {
   id: number
   title: string
@@ -19,6 +25,7 @@ export interface Goal {
   startDate: string | null
   endDate: string | null
   member: Member | null
+  assignees?: Assignee[]
   organizationName: string | null
   isOpen: boolean
   targetValue: number
@@ -72,6 +79,7 @@ export interface MenuItem {
 
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE'
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH'
+export type TaskWorkStatus = 'DONE' | 'IN_PROGRESS' | 'NOT_STARTED'
 
 export interface Action {
   id: number
@@ -91,7 +99,9 @@ export interface Task {
   title: string
   initiativeId: number
   memberId: number
+  assignees?: Assignee[]
   isDone?: boolean
+  workStatus?: TaskWorkStatus
   startDate: string
   endDate: string
   hypothesis: string
